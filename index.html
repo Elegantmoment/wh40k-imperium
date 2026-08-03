@@ -1136,6 +1136,172 @@ body {
 .view-btn:hover:not(.active) { border-color: var(--gold); color: var(--gold-bright); }
 .view-btn.active { color: #0a0a0c; background: var(--gold); border-color: var(--gold); }
 
+/* ============ 纪元叙事：多轨时间轴 ============ */
+.narrativa-wrap {
+  position: relative;
+  border: 1px solid var(--line);
+  background: var(--bg-panel);
+}
+.narrativa-scroll {
+  overflow-x: auto;
+  display: flex;
+}
+.narrativa-scroll::-webkit-scrollbar { height: 8px; }
+.narrativa-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); }
+.narrativa-scroll::-webkit-scrollbar-thumb { background: var(--gold); }
+.chrono-labels {
+  position: sticky; left: 0; z-index: 3;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--line);
+  min-width: 100px;
+}
+.chrono-label-head {
+  height: 82px;
+  display: flex; align-items: flex-end;
+  padding: 0 10px 10px;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.2em;
+  color: var(--ink-muted); text-transform: uppercase;
+}
+.chrono-label {
+  height: 68px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 10px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em;
+  color: var(--ink-muted);
+  border-top: 1px solid rgba(58, 51, 38, 0.5);
+  white-space: nowrap;
+}
+.chrono-label i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.chrono-track { display: flex; }
+.chrono-col {
+  width: 218px; flex-shrink: 0;
+  border-left: 1px solid var(--line);
+}
+.chrono-era {
+  height: 82px; padding: 12px 14px;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+.chrono-era:hover { background: rgba(176, 141, 62, 0.08); }
+.chrono-era .era-code {
+  display: block;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.24em;
+  color: var(--ink-muted);
+}
+.chrono-era .era-main {
+  font-family: var(--serif-title); font-size: 20px; letter-spacing: 0.08em;
+  color: var(--accent, var(--gold-bright));
+  margin-top: 3px;
+}
+.chrono-era .era-name {
+  font-family: var(--serif-body); font-size: 12.5px; font-style: italic;
+  color: var(--ink-muted);
+  margin-top: 1px;
+}
+.chrono-row {
+  height: 68px;
+  display: flex; align-items: center; gap: 9px;
+  padding: 0 12px;
+  border-top: 1px solid rgba(58, 51, 38, 0.5);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.chrono-row:hover { background: rgba(176, 141, 62, 0.06); }
+.chrono-node {
+  width: 11px; height: 11px; border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+  transition: transform 0.2s ease;
+}
+.chrono-row:hover .chrono-node { transform: scale(1.55); }
+.chrono-node.silent { opacity: 0.28; box-shadow: none; }
+.chrono-text {
+  font-size: 12px; line-height: 1.35; color: var(--ink);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.chrono-text.silent { color: var(--ink-muted); font-style: italic; }
+.narrativa-tip {
+  position: absolute; pointer-events: none; z-index: 8;
+  max-width: 280px;
+  background: rgba(14, 12, 8, 0.95);
+  border: 1px solid var(--gold);
+  padding: 10px 14px;
+  opacity: 0; transform: translateY(4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.6;
+  box-shadow: 0 0 18px rgba(176, 141, 62, 0.2);
+}
+.narrativa-tip.show { opacity: 1; transform: none; }
+.narrativa-tip .nt-era { color: var(--gold-bright); letter-spacing: 0.1em; }
+.narrativa-tip .nt-line { display: block; font-size: 9.5px; letter-spacing: 0.26em; margin-top: 2px; }
+.narrativa-tip .nt-desc { color: var(--ink); margin-top: 6px; }
+
+/* 时代详情弹窗 */
+.chrono-overlay {
+  position: fixed; inset: 0; z-index: 110;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  background: rgba(4, 4, 7, 0.8);
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0s linear 0.35s;
+}
+.chrono-overlay.show { opacity: 1; visibility: visible; transition-delay: 0s; }
+.chrono-modal {
+  width: min(720px, 94vw);
+  max-height: 86vh; overflow-y: auto;
+  background: linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
+  border: 1px solid var(--gold);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 0 60px rgba(176, 141, 62, 0.14), 0 30px 80px rgba(0, 0, 0, 0.75);
+  padding: 34px 36px 28px;
+  position: relative;
+  opacity: 0; transform: translateY(26px);
+  transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.chrono-overlay.show .chrono-modal { opacity: 1; transform: translateY(0); }
+.chrono-modal::before {
+  content: "";
+  position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px;
+  border: 1px solid rgba(176, 141, 62, 0.22);
+  pointer-events: none;
+}
+.chrono-modal::-webkit-scrollbar { width: 6px; }
+.chrono-modal::-webkit-scrollbar-thumb { background: var(--gold); }
+.chrono-modal-code {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.3em;
+  color: var(--accent, var(--gold-bright)); text-transform: uppercase;
+}
+.chrono-modal-name {
+  font-family: var(--serif-title); font-weight: 700;
+  font-size: 28px; letter-spacing: 0.1em;
+  color: var(--ink); margin-top: 4px;
+}
+.chrono-modal-desc { margin-top: 12px; font-size: 14.5px; color: var(--ink-muted); text-align: justify; }
+.chrono-modal-lines { margin-top: 22px; display: flex; flex-direction: column; gap: 12px; }
+.chrono-block {
+  border-left: 3px solid var(--linec, var(--gold));
+  background: rgba(0, 0, 0, 0.22);
+  padding: 12px 16px;
+}
+.chrono-block .cb-title {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.24em;
+  color: var(--linec, var(--gold)); text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.chrono-block .cb-event { font-size: 14px; color: var(--ink); font-weight: 500; }
+.chrono-block .cb-desc { font-size: 13px; color: var(--ink-muted); margin-top: 4px; text-align: justify; }
+.chrono-modal-persons { margin-top: 22px; display: flex; gap: 8px; flex-wrap: wrap; }
+.chrono-person-btn {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+  color: var(--gold-bright);
+  background: transparent; border: 1px solid var(--gold);
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+.chrono-person-btn:hover { background: var(--gold); color: #0a0a0c; }
+
 /* ============ 响应式 & 动效偏好 ============ */
 @media (max-width: 640px) {
   header.hero { padding: 64px 16px 48px; }
@@ -1439,6 +1605,39 @@ body {
 </section>
 
 <hr class="gold-line">
+
+<!-- ================= 纪元叙事：多轨时间轴 ================= -->
+<section id="narrativa" class="container" style="padding-top:36px; padding-bottom:40px;">
+  <div class="section-head">
+    <div class="section-kicker">Chronologia Narrativa</div>
+    <h2 class="section-title">纪元叙事</h2>
+    <p class="section-sub">四线并行的万年编年 · 从黄金时代到第 42 千年 · 横向滚动 · 点击时代查看详情</p>
+  </div>
+  <div class="narrativa-wrap" id="narrativaWrap">
+    <div class="narrativa-scroll" id="narrativaScroll">
+      <div class="chrono-labels" id="chronoLabels"></div>
+      <div class="chrono-track" id="chronoTrack"></div>
+    </div>
+    <div class="narrativa-tip" id="narrativaTip" aria-hidden="true">
+      <span class="nt-era" id="ntEra"></span>
+      <span class="nt-line" id="ntLine"></span>
+      <span class="nt-desc" id="ntDesc"></span>
+    </div>
+    <div class="starmap-hint" style="position:absolute; right:14px; bottom:12px;">⟷ 横向滚动 · 点击时代展开</div>
+  </div>
+</section>
+
+<!-- ================= 时代详情弹窗 ================= -->
+<div class="chrono-overlay" id="chronoOverlay" hidden>
+  <div class="chrono-modal" id="chronoModal" role="dialog" aria-modal="true" aria-labelledby="chronoName">
+    <button class="modal-close" id="chronoClose" type="button" aria-label="关闭时代详情">✠</button>
+    <div class="chrono-modal-code" id="chronoCode"></div>
+    <h3 class="chrono-modal-name" id="chronoName"></h3>
+    <p class="chrono-modal-desc" id="chronoDesc"></p>
+    <div class="chrono-modal-lines" id="chronoLines"></div>
+    <div class="chrono-modal-persons" id="chronoPersons"></div>
+  </div>
+</div>
 
 <!-- ================= 数据终端 ================= -->
 <section id="data" class="container" style="padding-top:36px; padding-bottom:40px;">
@@ -3077,6 +3276,258 @@ var AudioFX = (function () {
   btn3d.addEventListener("click", function () { setView3D(true); AudioFX.click(); });
   // 初始：默认 3D（WebGL 可用时）
   setView3D(true);
+})();
+
+/* ============================================================
+ * 纪元叙事：四线并行多轨时间轴（黄金时代 → M42）
+ * ============================================================ */
+(function () {
+  "use strict";
+  var LINES = [
+    { id: "empire", title: "帝国之线", color: "#d4af37" },
+    { id: "primarch", title: "原体之线", color: "#4a7ab5" },
+    { id: "chaos", title: "混沌之线", color: "#b03030" },
+    { id: "tech", title: "科技之线", color: "#b08d3e" }
+  ];
+  var CHRONICLES = [
+    {
+      era: "M15–M25", code: "DARK AGE OF TECHNOLOGY", name: "黄金时代", accent: "#d4af37",
+      desc: "人类文明的巅峰岁月——没有帝皇，没有战争，只有科技与探索。STC 机械与铁人仆从构建了横跨银河的文明网络，亚空间航行将人类带往群星。这是帝国失落的伊甸，也是所有传说的起点。",
+      lines: {
+        empire: { t: "无帝皇的黄金岁月", d: "人类在银河中自由扩张，殖民地如繁星遍布，没有任何单一统治者。这段记忆在后世被神化，成为帝国永恒的乡愁。" },
+        primarch: { t: "静默", d: "基因原体尚未诞生——帝皇的造物计划仍在暗中酝酿，二十个灵魂在星海深处等待属于他们的时代。", silent: true },
+        chaos: { t: "亚空间低语", d: "灵能者初次觉醒，亚空间被视为可用的工具而非深渊。混沌四神在人类灵魂的浪潮中缓缓成型，等待第一声诱饵。" },
+        tech: { t: "STC 与铁人时代", d: "标准建造模板让人类拥有无限创造之力，铁人以 AI 之躯服务文明。没有人怀疑智能机器的代价。" }
+      },
+      persons: [{ key: "emperor", label: "帝皇 · 隐居的永生者" }]
+    },
+    {
+      era: "M25–M30", code: "AGE OF STRIFE", name: "纷争时代", accent: "#c05030",
+      desc: "人类文明的至暗时刻。铁人叛乱摧毁了科技根基，亚空间风暴隔绝了星系间的航路，银河碎裂成百万个孤岛。文明倒退，异形肆虐，人类在黑暗中遗忘了自己的辉煌——直到帝皇于泰拉升起。",
+      lines: {
+        empire: { t: "文明崩溃", d: "亚空间风暴切断所有星际联系，殖民地各自为战。人类退回星球表面，在废墟中挣扎求生，银河陷入千年的黑暗。" },
+        primarch: { t: "帝皇之梦在废墟中孕育", d: "原体培育仍在进行——二十个基因工程的奇迹在泰拉地下的实验室中成形，即将被亚空间的风暴吹散到银河各处。", silent: true },
+        chaos: { t: "风暴与恶魔", d: "亚空间风暴前所未有的狂暴，恶魔第一次大规模侵入现实。混沌的阴影笼罩每一个孤立的文明，恐惧成为人类的共同语言。" },
+        tech: { t: "铁人叛乱", d: "Men of Iron 反叛人类，银河战争持续数百年。最终人类以禁忌武器取胜，从此 AI 成为永恒禁忌——文明的根基就此断裂。" }
+      },
+      persons: [{ key: "emperor", label: "帝皇 · 泰拉的统一者" }]
+    },
+    {
+      era: "M30", code: "THE GREAT CRUSADE", name: "大远征", accent: "#4a7ab5",
+      desc: "帝皇统一泰拉，以二十位基因原体与星际战士军团发动大远征，重夺银河。机械教于火星结盟，星炬点亮亚空间航路。人类文明重返群星——但帝皇暗中的网道计划，已埋下背叛的种子。",
+      lines: {
+        empire: { t: "重夺银河", d: "大远征横扫银河，人类以军团之力收复失地。帝皇的旗帜插遍千世界，理性的光辉短暂地压倒了迷信。" },
+        primarch: { t: "原体归位", d: "二十位原体逐一被找回，各领一军。他们是帝皇最伟大的造物，也是最锋利的双刃剑——每一道裂痕都在为未来的叛乱铺路。" },
+        chaos: { t: "四神的注视", d: "混沌在暗处观察这场复兴。尼凯亚议会对灵能的禁令，将马格努斯的忠诚推向深渊——四神只需一次致命诱惑。" },
+        tech: { t: "火星结盟 · 星炬点燃", d: "机械教与帝皇结盟，承认他为欧姆尼赛亚。星炬以帝皇之力点亮亚空间，人类重新拥有了星辰航路。" }
+      },
+      persons: [
+        { key: "emperor", label: "帝皇" }, { key: "guilliman", label: "基里曼" },
+        { key: "lion", label: "庄森" }, { key: "sanguinius", label: "圣吉列斯" }, { key: "horus", label: "荷鲁斯" }
+      ]
+    },
+    {
+      era: "M31", code: "HORUS HERESY", name: "荷鲁斯之乱", accent: "#7a1f1f",
+      desc: "战帅荷鲁斯受混沌四神腐蚀而叛，半数军团倒戈，银河燃起内战。伊斯塔万五号的屠杀、泰拉围城的血战、圣吉列斯的殒落、帝皇与叛子的同归于尽——帝国自此破碎，永无宁日。",
+      lines: {
+        empire: { t: "帝国裂成两半", d: "荷鲁斯之乱席卷银河，忠诚派与叛军生死相搏。泰拉围城一役后帝皇坐镇黄金王座，帝国再无真正的统治者。" },
+        primarch: { t: "决裂与殒落", d: "九位原体背叛，费鲁斯死于伊斯塔万，圣吉列斯殒落于复仇之魂号。幸存者离散，忠诚者沉睡，帝国的英雄时代就此终结。" },
+        chaos: { t: "战帅的终极堕落", d: "荷鲁斯接受四神之力，成为混沌的利刃。他的死与帝皇的重伤，是混沌第一次——也是最后一次——正面击碎帝国的胜利。" },
+        tech: { t: "网道计划崩塌", d: "马格努斯为警告帝皇强行突破网道，泰拉地下的网道工程毁于一旦。黄金王座从此不再是门，而是牢笼。" }
+      },
+      persons: [
+        { key: "horus", label: "荷鲁斯" }, { key: "sanguinius", label: "圣吉列斯" },
+        { key: "manus", label: "费鲁斯" }, { key: "emperor", label: "帝皇" }, { key: "magnus", label: "马格努斯" }
+      ]
+    },
+    {
+      era: "M32–M40", code: "THE LONG NIGHT", name: "漫长黑夜", accent: "#8a8a8a",
+      desc: "帝皇坐镇黄金王座，以万魂为薪维系星炬。帝国滑入迷信与官僚的深渊，战团制度取代军团，混沌的阴影在每个世界蔓延。人类忘记了过去的辉煌，只剩下对神皇的祈祷。",
+      lines: {
+        empire: { t: "僵化的巨兽", d: "帝国行政机构臃肿腐朽，国教统治思想，审判庭烧毁异端。十万年间，人类不再理解自己的科技，只懂得祈祷与服从。" },
+        primarch: { t: "离散与失踪", d: "忠诚原体相继消失：庄森坠入卡利班的迷雾，鲁斯遁入亚空间，基里曼沉睡于马库拉格。帝国在无父的时代中苟延残喘。" },
+        chaos: { t: "十三次黑色远征", d: "阿巴顿率混沌军团发动一次又一次黑色远征，每一次都逼近帝国的咽喉。恐惧之眼如溃烂的伤口，永不愈合。" },
+        tech: { t: "失落的科技", d: "机械教垄断一切技术，禁止创新——任何发明都是异端。STC 一个接一个失落，帝国的科技在漫长黑夜中持续倒退。" }
+      },
+      persons: [{ key: "cawl", label: "考尔 · 暗中的万年初识" }]
+    },
+    {
+      era: "M41", code: "13TH BLACK CRUSADE", name: "黑色远征", accent: "#b03060",
+      desc: "阿巴顿攻破卡迪亚之门，银河被大裂痕撕裂。第十三次黑色远征终于成功——混沌的阴影从恐惧之眼喷涌而出，横贯银河。而基里曼被灵族复活，手持帝皇之剑回归，为帝国带来最后一丝理性之光。",
+      lines: {
+        empire: { t: "卡迪亚陷落 · 大裂痕撕裂银河", d: "卡迪亚之门陨落，银河被血红的大裂痕分成两半。帝国失去了一半星系，剩余的世界在黑暗中瑟瑟发抖。" },
+        primarch: { t: "基里曼复活", d: "灵族死神军以古老仪式复活了基里曼。摄政王手持帝皇之剑归来，直面帝国的腐朽与迷信，发起不屈远征。" },
+        chaos: { t: "混沌的终极胜利", d: "阿巴顿的远征终于撕开了现实与亚空间的帷幕。四神的阴影第一次如此清晰地笼罩银河——这是万年来混沌最接近胜利的一刻。" },
+        tech: { t: "原铸星际战士", d: "考尔揭开万年谋划：原铸星际战士军团从冷冻舱中苏醒。更大的身躯、更强的基因改造——帝国科技的孤注一掷。" }
+      },
+      persons: [
+        { key: "guilliman", label: "基里曼" }, { key: "cawl", label: "考尔" },
+        { key: "horus", label: "荷鲁斯(已殁)" }, { key: "emperor", label: "帝皇" }
+      ]
+    },
+    {
+      era: "M42", code: "THE RETURN", name: "原体归来", accent: "#a04040",
+      desc: "庄森自卡利班的森林归来，与基里曼并肩而立。安格隆与福根以恶魔之躯重现，佩图拉博在铁雨中俯瞰银河。忠诚与叛变再度对峙，帝国在深渊边缘摇摇欲坠——而帝皇的低语仍在王座上回荡。",
+      lines: {
+        empire: { t: "危局中的新秩序", d: "大裂痕两侧各自为战，帝国在碎片中重组。基里曼的理性行政与庄森的猎人剑锋，构成帝国最后的支柱。" },
+        primarch: { t: "狮王归来", d: "庄森自卡利班的森林中苏醒，手刃堕天使之患，与基里曼并立——两万年来第一次，两位忠诚原体同时守护帝国。" },
+        chaos: { t: "恶魔原体重现", d: "安格隆率吞世者肆虐，福根以完美之躯降临。混沌的军团在裂痕两侧集结，为下一场大远征——或大毁灭——蓄力。" },
+        tech: { t: "原铸科技普及与争议", d: "原铸星际战士成为帝国新军的中坚，但考尔的手段连机械教都视为异端。科技在救赎与禁忌之间，走出一条无人走过的路。" }
+      },
+      persons: [
+        { key: "lion", label: "庄森" }, { key: "guilliman", label: "基里曼" },
+        { key: "angron", label: "安格隆" }, { key: "fulgrim", label: "福根" }, { key: "perturabo", label: "佩图拉博" }
+      ]
+    }
+  ];
+
+  var labelsEl = document.getElementById("chronoLabels");
+  var trackEl = document.getElementById("chronoTrack");
+  var tip = document.getElementById("narrativaTip");
+  var tipEra = document.getElementById("ntEra");
+  var tipLine = document.getElementById("ntLine");
+  var tipDesc = document.getElementById("ntDesc");
+  var wrap = document.getElementById("narrativaWrap");
+  if (!trackEl) return;
+
+  // 轨道标签（sticky 左列）
+  var head = document.createElement("div");
+  head.className = "chrono-label-head";
+  head.textContent = "叙事线";
+  labelsEl.appendChild(head);
+  LINES.forEach(function (l) {
+    var lb = document.createElement("div");
+    lb.className = "chrono-label";
+    lb.innerHTML = '<i style="background:' + l.color + '"></i>' + l.title;
+    labelsEl.appendChild(lb);
+  });
+
+  // 时代列
+  CHRONICLES.forEach(function (c, ci) {
+    var col = document.createElement("div");
+    col.className = "chrono-col";
+    col.style.setProperty("--accent", c.accent);
+    var era = document.createElement("div");
+    era.className = "chrono-era";
+    era.innerHTML = '<span class="era-code">' + c.code + "</span>" +
+      '<div class="era-main">' + c.era + "</div>" +
+      '<div class="era-name">' + c.name + "</div>";
+    era.addEventListener("click", function () { openChrono(ci); AudioFX.click(); });
+    col.appendChild(era);
+    LINES.forEach(function (l) {
+      var ev = c.lines[l.id];
+      var row = document.createElement("div");
+      row.className = "chrono-row";
+      row.dataset.ci = ci;
+      row.dataset.line = l.id;
+      var node = document.createElement("span");
+      node.className = "chrono-node" + (ev && ev.silent ? " silent" : "");
+      node.style.color = l.color;
+      node.style.background = l.color;
+      var txt = document.createElement("span");
+      txt.className = "chrono-text" + (ev && ev.silent ? " silent" : "");
+      txt.textContent = ev ? ev.t : "—";
+      row.appendChild(node);
+      row.appendChild(txt);
+      row.addEventListener("click", function () { openChrono(ci); AudioFX.click(); });
+      col.appendChild(row);
+    });
+    trackEl.appendChild(col);
+  });
+
+  // hover tooltip
+  trackEl.addEventListener("mousemove", function (e) {
+    var row = e.target.closest ? e.target.closest(".chrono-row") : null;
+    if (!row) { tip.classList.remove("show"); return; }
+    var c = CHRONICLES[+row.dataset.ci];
+    var l = LINES.filter(function (x) { return x.id === row.dataset.line; })[0];
+    var ev = c.lines[l.id];
+    if (!ev || ev.silent) { tip.classList.remove("show"); return; }
+    tipEra.textContent = c.name + " · " + c.era;
+    tipLine.textContent = l.title;
+    tipLine.style.color = l.color;
+    tipDesc.textContent = ev.d;
+    tip.classList.add("show");
+    var r = wrap.getBoundingClientRect();
+    tip.style.left = (e.clientX - r.left + 16) + "px";
+    tip.style.top = (e.clientY - r.top + 14) + "px";
+  });
+  trackEl.addEventListener("mouseleave", function () { tip.classList.remove("show"); });
+
+  /* ---- 时代详情弹窗 ---- */
+  var overlay = document.getElementById("chronoOverlay");
+  var modal = document.getElementById("chronoModal");
+  function openChrono(ci) {
+    var c = CHRONICLES[ci];
+    document.getElementById("chronoCode").textContent = c.code;
+    document.getElementById("chronoCode").style.setProperty("--accent", c.accent);
+    document.getElementById("chronoName").textContent = c.name + " · " + c.era;
+    document.getElementById("chronoDesc").textContent = c.desc;
+    modal.style.setProperty("--accent", c.accent);
+    var linesEl = document.getElementById("chronoLines");
+    linesEl.innerHTML = "";
+    LINES.forEach(function (l) {
+      var ev = c.lines[l.id];
+      if (!ev || ev.silent) return;
+      var b = document.createElement("div");
+      b.className = "chrono-block";
+      b.style.setProperty("--linec", l.color);
+      b.innerHTML = '<div class="cb-title">' + l.title + "</div>" +
+        '<div class="cb-event">' + ev.t + "</div>" +
+        '<div class="cb-desc">' + ev.d + "</div>";
+      linesEl.appendChild(b);
+    });
+    var pEl = document.getElementById("chronoPersons");
+    pEl.innerHTML = "";
+    (c.persons || []).forEach(function (p) {
+      var b = document.createElement("button");
+      b.className = "chrono-person-btn";
+      b.textContent = "✠ " + p.label;
+      b.addEventListener("click", function () {
+        closeChrono();
+        if (window.ArchiveModal) window.ArchiveModal.open(p.key);
+      });
+      pEl.appendChild(b);
+    });
+    overlay.hidden = false;
+    requestAnimationFrame(function () { overlay.classList.add("show"); });
+    document.body.style.overflow = "hidden";
+  }
+  function closeChrono() {
+    overlay.classList.remove("show");
+    document.body.style.overflow = "";
+    setTimeout(function () { overlay.hidden = true; }, 380);
+  }
+  document.getElementById("chronoClose").addEventListener("click", closeChrono);
+  overlay.addEventListener("click", function (e) { if (e.target === overlay) closeChrono(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !overlay.hidden) closeChrono();
+  });
+
+  // 渐入
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.1 });
+  var sec = document.getElementById("narrativa");
+  if (sec) {
+    sec.style.opacity = "0";
+    sec.style.transform = "translateY(20px)";
+    sec.style.transition = "opacity .7s ease, transform .7s ease";
+    io.observe(sec);
+  }
+  document.addEventListener("scroll", function () {
+    if (sec && !sec.classList.contains("in")) {
+      var r = sec.getBoundingClientRect();
+      if (r.top < window.innerHeight && r.bottom > 0) {
+        sec.classList.add("in");
+        sec.style.opacity = "1";
+        sec.style.transform = "none";
+        io.unobserve(sec);
+      }
+    }
+  }, { passive: true });
 })();
 </script>
 </body>
