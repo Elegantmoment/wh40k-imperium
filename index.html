@@ -1302,6 +1302,143 @@ body {
 }
 .chrono-person-btn:hover { background: var(--gold); color: #0a0a0c; }
 
+/* ============ 多视图拆分：导航 + 路由 ============ */
+.main-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9990;
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 20px;
+  background: rgba(10, 10, 12, 0.92);
+  border-bottom: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.main-nav .nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  margin-right: 16px;
+  font-family: var(--serif-title); font-size: 14px; letter-spacing: 0.18em;
+  color: var(--gold-bright); text-transform: uppercase;
+  text-decoration: none;
+}
+.main-nav .nav-logo svg { width: 26px; height: 26px; }
+.nav-link {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+  color: var(--ink-muted); text-transform: uppercase;
+  text-decoration: none;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  transition: all 0.25s ease;
+}
+.nav-link:hover { color: var(--gold-bright); border-color: var(--line); }
+.nav-link.active {
+  color: #0a0a0c; background: var(--gold); border-color: var(--gold);
+}
+body { padding-top: 58px; }
+.view { display: none; }
+body.page-home .view-home,
+body.page-legends .view-legends,
+body.page-starmap .view-starmap,
+body.page-chronicle .view-chronicle,
+body.page-terminal .view-terminal { display: block; }
+
+/* 首页：入口卡片 */
+.home-entry { padding: 60px 0 70px; }
+.entry-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 22px; margin-top: 44px;
+}
+.entry-card {
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
+  padding: 28px 24px 22px;
+  position: relative;
+  text-decoration: none;
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+.entry-card::before {
+  content: "";
+  position: absolute; top: -1px; left: 14%; right: 14%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.entry-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5), 0 0 24px rgba(176, 141, 62, 0.12);
+}
+.entry-card .ec-num {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.3em;
+  color: var(--gold); text-transform: uppercase;
+}
+.entry-card h3 {
+  font-family: var(--serif-title); font-size: 20px; letter-spacing: 0.08em;
+  color: var(--ink); margin: 10px 0 8px;
+}
+.entry-card p { font-size: 13.5px; color: var(--ink-muted); line-height: 1.6; }
+.entry-card .ec-go {
+  display: inline-block; margin-top: 14px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.24em;
+  color: var(--gold-bright); text-transform: uppercase;
+  border-bottom: 1px solid rgba(176, 141, 62, 0.4);
+  padding-bottom: 2px;
+}
+
+/* ============ 纪元叙事：上升之树 ============ */
+.tree-wrap {
+  border: 1px solid var(--line);
+  background: radial-gradient(ellipse 80% 60% at 50% 100%, #12101a, #070709 70%);
+  position: relative;
+  overflow: hidden;
+}
+.tree-wrap svg { display: block; width: 100%; height: auto; }
+.tree-trunk {
+  fill: none; stroke: #d4af37; stroke-width: 4;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.45));
+  stroke-dashoffset: 0;
+  animation: treeGrow 3.2s ease-out forwards;
+}
+.tree-branch {
+  fill: none; stroke-width: 2.5; stroke-linecap: round;
+  stroke-dashoffset: 0;
+  animation: treeGrow 2.4s ease-out forwards;
+}
+.tree-branch.chaos { stroke: #b03030; filter: drop-shadow(0 0 5px rgba(176, 48, 48, 0.5)); }
+.tree-branch.tech { stroke: #b08d3e; filter: drop-shadow(0 0 5px rgba(176, 141, 62, 0.4)); }
+.tree-branch.crown { stroke: #d4af37; stroke-width: 2; animation-delay: 2.2s; }
+@keyframes treeGrow {
+  from { stroke-dashoffset: 2600; }
+  to   { stroke-dashoffset: 0; }
+}
+.tree-node {
+  opacity: 1;
+  animation: treeRise 0.7s ease-out forwards;
+  cursor: pointer;
+}
+.tree-node .tn-ring {
+  fill: #0d0d0f; stroke-width: 2.5;
+  transition: filter 0.25s ease;
+}
+.tree-node:hover .tn-ring { filter: drop-shadow(0 0 8px currentColor); }
+.tree-node .tn-dot { stroke-width: 1; }
+.tree-label {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+  fill: var(--ink-muted);
+  pointer-events: none;
+}
+.tree-label.era-name { font-family: var(--serif-title); font-size: 15px; fill: var(--ink); letter-spacing: 0.08em; }
+.tree-label.era-code { font-size: 8.5px; letter-spacing: 0.26em; fill: var(--ink-muted); }
+.tree-label.line-name { font-size: 9px; letter-spacing: 0.3em; fill: var(--ink-muted); }
+@keyframes treeRise {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.tree-hint {
+  position: absolute; right: 14px; bottom: 12px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.26em;
+  color: var(--ink-muted); text-transform: uppercase;
+  pointer-events: none;
+}
+
 /* ============ 响应式 & 动效偏好 ============ */
 @media (max-width: 640px) {
   header.hero { padding: 64px 16px 48px; }
@@ -1338,8 +1475,21 @@ body {
 
 <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
+<!-- ================= 主导航 ================= -->
+<nav class="main-nav" aria-label="主导航">
+  <a class="nav-logo" href="#/" aria-label="返回首页">
+    <svg viewBox="0 0 100 100"><g fill="none" stroke="#b08d3e" stroke-width="8"><circle cx="50" cy="50" r="38"/><path d="M50 12 L50 88 M12 50 L88 50"/></g></svg>
+    <span>Imperium Chronicle</span>
+  </a>
+  <a class="nav-link" data-page="home" href="#/">首页</a>
+  <a class="nav-link" data-page="legends" href="#/legends">英雄列传</a>
+  <a class="nav-link" data-page="starmap" href="#/starmap">帝国星图</a>
+  <a class="nav-link" data-page="chronicle" href="#/chronicle">纪元叙事</a>
+  <a class="nav-link" data-page="terminal" href="#/terminal">军务部终端</a>
+</nav>
+
 <!-- ================= 顶部：帝国徽记 ================= -->
-<header class="hero">
+<header class="hero view view-home">
   <span class="hero-orn left" aria-hidden="true"></span>
   <span class="hero-orn right" aria-hidden="true"></span>
   <div class="container">
@@ -1376,10 +1526,45 @@ body {
   </div>
 </header>
 
+<!-- ================= 首页：档案馆入口 ================= -->
+<section class="home-entry view view-home container" style="padding-top:8px;">
+  <div class="section-head">
+    <div class="section-kicker">Archivum Imperiale</div>
+    <h2 class="section-title">帝国档案馆</h2>
+    <p class="section-sub">四重卷宗 · 从人物到银河 · 从历史到终端</p>
+  </div>
+  <div class="entry-grid">
+    <a class="entry-card" href="#/legends">
+      <div class="ec-num">Vol. I · PERSONAE</div>
+      <h3>英雄列传</h3>
+      <p>十二位要员档案——帝皇、原体与叛徒的完整生平、语录与装备。检索、筛选、翻阅。</p>
+      <span class="ec-go">开启卷宗 →</span>
+    </a>
+    <a class="entry-card" href="#/starmap">
+      <div class="ec-num">Vol. II · CARTOGRAPHIA</div>
+      <h3>帝国星图</h3>
+      <p>可交互的银河系——2D 学术档案与 3D 粒子银河双视图，光点悬停见历史，点击开档案。</p>
+      <span class="ec-go">展开星图 →</span>
+    </a>
+    <a class="entry-card" href="#/chronicle">
+      <div class="ec-num">Vol. III · CHRONOLOGIA</div>
+      <h3>纪元叙事</h3>
+      <p>从黄金时代到第 42 千年的上升之树——帝国、原体、混沌、科技四线并行的万年编年。</p>
+      <span class="ec-go">攀援圣树 →</span>
+    </a>
+    <a class="entry-card" href="#/terminal">
+      <div class="ec-num">Vol. IV · MUNITORUM</div>
+      <h3>军务部终端</h3>
+      <p>实时遥测数据流、波形可视化与命令行交互——帝国情报终端，接口契约预留真后端接入。</p>
+      <span class="ec-go">接入终端 →</span>
+    </a>
+  </div>
+</section>
+
 <hr class="gold-line">
 
 <!-- ================= 人物列传 ================= -->
-<section id="legends" class="container" style="padding-top:36px;">
+<section id="legends" class="container view view-legends" style="padding-top:36px;">
   <div class="section-head">
     <div class="section-kicker">Heroes &amp; Heretics</div>
     <h2 class="section-title">英雄列传</h2>
@@ -1583,7 +1768,7 @@ body {
 </section>
 
 <!-- ================= 帝国星图 ================= -->
-<section id="starmap" class="container" style="padding-top:36px; padding-bottom:40px;">
+<section id="starmap" class="container view view-starmap" style="padding-top:36px; padding-bottom:40px;">
   <div class="section-head">
     <div class="section-kicker">Cartographia Imperialis</div>
     <h2 class="section-title">帝国星图</h2>
@@ -1607,23 +1792,20 @@ body {
 <hr class="gold-line">
 
 <!-- ================= 纪元叙事：多轨时间轴 ================= -->
-<section id="narrativa" class="container" style="padding-top:36px; padding-bottom:40px;">
+<section id="narrativa" class="container view view-chronicle" style="padding-top:36px; padding-bottom:40px;">
   <div class="section-head">
     <div class="section-kicker">Chronologia Narrativa</div>
-    <h2 class="section-title">纪元叙事</h2>
-    <p class="section-sub">四线并行的万年编年 · 从黄金时代到第 42 千年 · 横向滚动 · 点击时代查看详情</p>
+    <h2 class="section-title">纪元叙事 · 上升之树</h2>
+    <p class="section-sub">帝国为主干 · 混沌与科技为枝 · 原体为芽 · 从黄金时代生长至第 42 千年</p>
   </div>
-  <div class="narrativa-wrap" id="narrativaWrap">
-    <div class="narrativa-scroll" id="narrativaScroll">
-      <div class="chrono-labels" id="chronoLabels"></div>
-      <div class="chrono-track" id="chronoTrack"></div>
-    </div>
+  <div class="tree-wrap" id="treeWrap">
+    <svg id="treeSvg" viewBox="0 0 1000 1500" preserveAspectRatio="xMidYMid meet" role="img" aria-label="纪元上升之树"></svg>
     <div class="narrativa-tip" id="narrativaTip" aria-hidden="true">
       <span class="nt-era" id="ntEra"></span>
       <span class="nt-line" id="ntLine"></span>
       <span class="nt-desc" id="ntDesc"></span>
     </div>
-    <div class="starmap-hint" style="position:absolute; right:14px; bottom:12px;">⟷ 横向滚动 · 点击时代展开</div>
+    <div class="tree-hint">✥ 树干帝国 · 左枝混沌 · 右枝科技 · 蓝芽原体 · 点击节点</div>
   </div>
 </section>
 
@@ -1640,7 +1822,7 @@ body {
 </div>
 
 <!-- ================= 数据终端 ================= -->
-<section id="data" class="container" style="padding-top:36px; padding-bottom:40px;">
+<section id="data" class="container view view-terminal" style="padding-top:36px; padding-bottom:40px;">
   <div class="section-head">
     <div class="section-kicker">Departmento Munitorum</div>
     <h2 class="section-title">军务部情报终端</h2>
@@ -1762,37 +1944,6 @@ body {
     </div>
   </div>
 </div>
-
-<!-- ================= 帝国大事记 ================= -->
-<section id="chronicle" class="container" style="padding-top:36px; padding-bottom:40px;">
-  <div class="section-head">
-    <div class="section-kicker">Chronologia Imperii</div>
-    <h2 class="section-title">帝国大事记</h2>
-    <p class="section-sub">从大远征到原体归来的万年编年</p>
-  </div>
-  <div class="timeline">
-    <div class="tl-item">
-      <div class="tl-era">M30<span class="tl-code">THE GREAT CRUSADE · 大远征</span></div>
-      <p class="tl-desc">帝皇统一泰拉，以二十位基因原体与星际战士军团发动大远征，重夺银河。机械教于火星结盟，星炬点亮亚空间航路，人类文明重返群星——但帝皇暗中的网道计划，已埋下背叛的种子。</p>
-    </div>
-    <div class="tl-item fallen">
-      <div class="tl-era">M31<span class="tl-code">HORUS HERESY · 荷鲁斯之乱</span></div>
-      <p class="tl-desc">战帅荷鲁斯受混沌四神腐蚀而叛，半数军团倒戈，银河燃起内战。伊斯塔万五号之役费鲁斯·马努斯殒落；泰拉围城，圣吉列斯独战荷鲁斯而亡，帝皇与叛子同归于尽——帝国自此破碎，永无宁日。</p>
-    </div>
-    <div class="tl-item">
-      <div class="tl-era">M32 – M40<span class="tl-code">THE LONG NIGHT · 漫长黑夜</span></div>
-      <p class="tl-desc">帝皇坐镇黄金王座，以万魂为薪维系星炬。帝国滑入迷信与官僚的深渊，战团制度取代军团，混沌的阴影在每个世界蔓延。人类忘记了过去的辉煌，只剩下对神皇的祈祷。</p>
-    </div>
-    <div class="tl-item">
-      <div class="tl-era">M41<span class="tl-code">13TH BLACK CRUSADE · 第十三次黑色远征</span></div>
-      <p class="tl-desc">阿巴顿率混沌军团攻破卡迪亚之门，银河撕裂，大裂痕横贯星海。基里曼被灵族复活，手持帝皇之剑回归，颁布不屈远征令，以原铸星际战士重建帝国——理性的火炬重燃于黑暗。</p>
-    </div>
-    <div class="tl-item fallen">
-      <div class="tl-era">M42<span class="tl-code">THE RETURN · 原体归来</span></div>
-      <p class="tl-desc">庄森自卡利班的森林归来，与基里曼并肩而立；安格隆与福根以恶魔之躯重现，佩图拉博在铁雨中俯瞰银河。忠诚与叛变再度对峙，帝国在深渊边缘摇摇欲坠——而帝皇的低语仍在王座上回荡。</p>
-    </div>
-  </div>
-</section>
 
 <footer>
   <svg class="sigil" viewBox="0 0 100 100" aria-hidden="true">
@@ -3381,67 +3532,92 @@ var AudioFX = (function () {
     }
   ];
 
-  var labelsEl = document.getElementById("chronoLabels");
-  var trackEl = document.getElementById("chronoTrack");
+  /* ---- 上升之树渲染（帝国主干 → 混沌左枝 → 科技右枝 → 原体之芽 → 树冠） ---- */
+  var svg = document.getElementById("treeSvg");
+  var wrap = document.getElementById("treeWrap");
   var tip = document.getElementById("narrativaTip");
   var tipEra = document.getElementById("ntEra");
   var tipLine = document.getElementById("ntLine");
   var tipDesc = document.getElementById("ntDesc");
-  var wrap = document.getElementById("narrativaWrap");
-  if (!trackEl) return;
+  if (!svg) return;
+  var NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, text) {
+    var n = document.createElementNS(NS, tag);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+  var NODES = [500, 505, 498, 500, 497, 503, 500];          // 主干 x（时代 y 自定）
+  var ERAS_Y = [1450, 1245, 1040, 835, 630, 425, 220];      // 时代 y（根 → 冠）
+  var CHAOS_PTS = [[440, 1402], [428, 1200], [418, 1002], [382, 790], [330, 652], [295, 470], [238, 310]];
+  var TECH_PTS = [[560, 1398], [572, 1196], [586, 1000], [608, 796], [652, 640], [695, 470], [742, 320]];
+  var PRIM_PTS = [[468, 1432], [478, 1227], [528, 1012], [530, 817], [473, 612], [528, 407], [530, 202]];
 
-  // 轨道标签（sticky 左列）
-  var head = document.createElement("div");
-  head.className = "chrono-label-head";
-  head.textContent = "叙事线";
-  labelsEl.appendChild(head);
-  LINES.forEach(function (l) {
-    var lb = document.createElement("div");
-    lb.className = "chrono-label";
-    lb.innerHTML = '<i style="background:' + l.color + '"></i>' + l.title;
-    labelsEl.appendChild(lb);
+  // 枝干
+  svg.appendChild(el("path", { class: "tree-trunk", d: "M500,1450 C520,1150 480,800 500,220" }));
+  svg.appendChild(el("path", { class: "tree-branch chaos", d: "M500,835 C380,780 300,660 262,500 C240,400 215,290 195,190" }));
+  svg.appendChild(el("path", { class: "tree-branch tech", d: "M500,1040 C620,980 700,830 738,660 C762,560 785,400 800,220" }));
+  svg.appendChild(el("path", { class: "tree-branch crown", d: "M500,220 C470,140 430,90 400,30" }));
+  svg.appendChild(el("path", { class: "tree-branch crown", d: "M500,220 C500,150 500,90 500,20" }));
+  svg.appendChild(el("path", { class: "tree-branch crown", d: "M500,220 C530,140 570,90 600,30" }));
+  // 线名
+  svg.appendChild(el("text", { class: "tree-label line-name", x: 430, y: 1458, "text-anchor": "end" }, "帝国之线 EMPIRE"));
+  svg.appendChild(el("text", { class: "tree-label line-name", x: 255, y: 520, "text-anchor": "end", fill: "#c07070" }, "混沌之线 CHAOS"));
+  svg.appendChild(el("text", { class: "tree-label line-name", x: 745, y: 540, "text-anchor": "start", fill: "#a08a5a" }, "科技之线 TECH"));
+  svg.appendChild(el("text", { class: "tree-label line-name", x: 555, y: 148, "text-anchor": "middle", fill: "#8aa8c8" }, "原体之芽 PRIMARCH"));
+
+  // 时代节点（主干）
+  CHRONICLES.forEach(function (c, i) {
+    var g = el("g", { class: "tree-node", transform: "translate(" + NODES[i] + "," + ERAS_Y[i] + ")", "data-ci": i });
+    g.style.animationDelay = (0.4 + i * 0.38) + "s";
+    var ring = el("circle", { class: "tn-ring", r: 17, stroke: c.accent, fill: "#0d0d0f" });
+    ring.style.color = c.accent;
+    g.appendChild(ring);
+    g.appendChild(el("circle", { class: "tn-dot", r: 5, fill: c.accent }));
+    g.appendChild(el("text", { class: "tree-label era-name", x: 32, y: -2 }, c.era));
+    g.appendChild(el("text", { class: "tree-label era-code", x: 32, y: 15 }, c.name));
+    g.addEventListener("click", function () { openChrono(i); AudioFX.click(); });
+    svg.appendChild(g);
+  });
+  // 混沌左枝事件点
+  CHRONICLES.forEach(function (c, i) {
+    var g = el("g", { class: "tree-node", transform: "translate(" + CHAOS_PTS[i][0] + "," + CHAOS_PTS[i][1] + ")", "data-ci": i, "data-line": "chaos" });
+    g.style.animationDelay = (0.5 + i * 0.38) + "s";
+    var d = el("circle", { class: "tn-dot", r: i >= 3 ? 6.5 : 5, fill: "#b03030" });
+    d.style.color = "#b03030";
+    g.appendChild(d);
+    g.addEventListener("click", function () { openChrono(i); AudioFX.click(); });
+    svg.appendChild(g);
+  });
+  // 科技右枝事件点
+  CHRONICLES.forEach(function (c, i) {
+    var g = el("g", { class: "tree-node", transform: "translate(" + TECH_PTS[i][0] + "," + TECH_PTS[i][1] + ")", "data-ci": i, "data-line": "tech" });
+    g.style.animationDelay = (0.55 + i * 0.38) + "s";
+    var d = el("circle", { class: "tn-dot", r: 5, fill: "#b08d3e" });
+    d.style.color = "#b08d3e";
+    g.appendChild(d);
+    g.addEventListener("click", function () { openChrono(i); AudioFX.click(); });
+    svg.appendChild(g);
+  });
+  // 原体之芽（蓝点）
+  CHRONICLES.forEach(function (c, i) {
+    var g = el("g", { class: "tree-node", transform: "translate(" + PRIM_PTS[i][0] + "," + PRIM_PTS[i][1] + ")", "data-ci": i, "data-line": "primarch" });
+    g.style.animationDelay = (0.45 + i * 0.38) + "s";
+    var d = el("circle", { class: "tn-dot", r: i === 3 ? 6 : 4.5, fill: i === 3 ? "#7a1f1f" : "#4a7ab5" });
+    d.style.color = i === 3 ? "#7a1f1f" : "#4a7ab5";
+    g.appendChild(d);
+    g.addEventListener("click", function () { openChrono(i); AudioFX.click(); });
+    svg.appendChild(g);
   });
 
-  // 时代列
-  CHRONICLES.forEach(function (c, ci) {
-    var col = document.createElement("div");
-    col.className = "chrono-col";
-    col.style.setProperty("--accent", c.accent);
-    var era = document.createElement("div");
-    era.className = "chrono-era";
-    era.innerHTML = '<span class="era-code">' + c.code + "</span>" +
-      '<div class="era-main">' + c.era + "</div>" +
-      '<div class="era-name">' + c.name + "</div>";
-    era.addEventListener("click", function () { openChrono(ci); AudioFX.click(); });
-    col.appendChild(era);
-    LINES.forEach(function (l) {
-      var ev = c.lines[l.id];
-      var row = document.createElement("div");
-      row.className = "chrono-row";
-      row.dataset.ci = ci;
-      row.dataset.line = l.id;
-      var node = document.createElement("span");
-      node.className = "chrono-node" + (ev && ev.silent ? " silent" : "");
-      node.style.color = l.color;
-      node.style.background = l.color;
-      var txt = document.createElement("span");
-      txt.className = "chrono-text" + (ev && ev.silent ? " silent" : "");
-      txt.textContent = ev ? ev.t : "—";
-      row.appendChild(node);
-      row.appendChild(txt);
-      row.addEventListener("click", function () { openChrono(ci); AudioFX.click(); });
-      col.appendChild(row);
-    });
-    trackEl.appendChild(col);
-  });
-
-  // hover tooltip
-  trackEl.addEventListener("mousemove", function (e) {
-    var row = e.target.closest ? e.target.closest(".chrono-row") : null;
-    if (!row) { tip.classList.remove("show"); return; }
-    var c = CHRONICLES[+row.dataset.ci];
-    var l = LINES.filter(function (x) { return x.id === row.dataset.line; })[0];
-    var ev = c.lines[l.id];
+  // hover tooltip（事件委托）
+  svg.addEventListener("mousemove", function (e) {
+    var nd = e.target.closest ? e.target.closest(".tree-node") : null;
+    if (!nd) { tip.classList.remove("show"); return; }
+    var c = CHRONICLES[+nd.dataset.ci];
+    var line = nd.dataset.line || "empire";
+    var l = LINES.filter(function (x) { return x.id === line; })[0];
+    var ev = c.lines[line];
     if (!ev || ev.silent) { tip.classList.remove("show"); return; }
     tipEra.textContent = c.name + " · " + c.era;
     tipLine.textContent = l.title;
@@ -3452,7 +3628,13 @@ var AudioFX = (function () {
     tip.style.left = (e.clientX - r.left + 16) + "px";
     tip.style.top = (e.clientY - r.top + 14) + "px";
   });
-  trackEl.addEventListener("mouseleave", function () { tip.classList.remove("show"); });
+  svg.addEventListener("mouseleave", function () { tip.classList.remove("show"); });
+
+  // 动画兜底：动画时间结束后强制最终可见态（兼容动画不推进的环境）
+  setTimeout(function () {
+    svg.querySelectorAll(".tree-node").forEach(function (n) { n.style.opacity = "1"; });
+    svg.querySelectorAll("path").forEach(function (p) { p.style.strokeDashoffset = "0"; });
+  }, 3800);
 
   /* ---- 时代详情弹窗 ---- */
   var overlay = document.getElementById("chronoOverlay");
@@ -3528,6 +3710,48 @@ var AudioFX = (function () {
       }
     }
   }, { passive: true });
+})();
+
+/* ============================================================
+ * 多视图路由（hash 导航）
+ * ============================================================ */
+(function () {
+  "use strict";
+  var PAGES = ["home", "legends", "starmap", "chronicle", "terminal"];
+  function setPage(p) {
+    if (PAGES.indexOf(p) === -1) p = "home";
+    var cls = document.body.className.replace(/\bpage-\w+/g, "").trim();
+    document.body.className = cls + " page-" + p;
+    document.querySelectorAll(".nav-link").forEach(function (a) {
+      a.classList.toggle("active", a.dataset.page === p);
+    });
+    window.scrollTo(0, 0);
+    if (p === "starmap") {
+      // 3D 视图重新适配尺寸（canvas 从 display:none 恢复）
+      setTimeout(function () { window.dispatchEvent(new Event("resize")); }, 60);
+    }
+    // 触发滚动渐入兜底（英雄卡/时间线等）
+    setTimeout(function () { window.dispatchEvent(new Event("scroll")); }, 80);
+    // 关闭可能残留的弹窗
+    var ov = document.getElementById("modalOverlay");
+    if (ov && !ov.hidden) {
+      ov.classList.remove("show");
+      document.body.style.overflow = "";
+      setTimeout(function () { ov.hidden = true; }, 350);
+    }
+    var co = document.getElementById("chronoOverlay");
+    if (co && !co.hidden) {
+      co.classList.remove("show");
+      document.body.style.overflow = "";
+      setTimeout(function () { co.hidden = true; }, 350);
+    }
+  }
+  function route() {
+    var h = (location.hash || "#/").replace(/^#\/?/, "").split("/")[0];
+    setPage(h || "home");
+  }
+  window.addEventListener("hashchange", route);
+  route();
 })();
 </script>
 </body>
