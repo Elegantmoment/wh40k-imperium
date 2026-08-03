@@ -1382,7 +1382,7 @@ body.page-terminal .view-terminal { display: block; }
   padding-bottom: 2px;
 }
 
-/* ============ 纪元叙事：上升之树 ============ */
+/* ============ 纪元叙事：上升之树（样式全部 inline，此处仅布局与 hover） ============ */
 .tree-wrap {
   border: 1px solid var(--line);
   background: radial-gradient(ellipse 80% 60% at 50% 100%, #12101a, #070709 70%);
@@ -1390,48 +1390,10 @@ body.page-terminal .view-terminal { display: block; }
   overflow: hidden;
 }
 .tree-wrap svg { display: block; width: 100%; height: auto; }
-.tree-trunk {
-  fill: none; stroke: #d4af37; stroke-width: 4;
-  stroke-linecap: round;
-  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.45));
-  stroke-dashoffset: 0;
-  animation: treeGrow 3.2s ease-out forwards;
-}
-.tree-branch {
-  fill: none; stroke-width: 2.5; stroke-linecap: round;
-  stroke-dashoffset: 0;
-  animation: treeGrow 2.4s ease-out forwards;
-}
-.tree-branch.chaos { stroke: #b03030; filter: drop-shadow(0 0 5px rgba(176, 48, 48, 0.5)); }
-.tree-branch.tech { stroke: #b08d3e; filter: drop-shadow(0 0 5px rgba(176, 141, 62, 0.4)); }
-.tree-branch.crown { stroke: #d4af37; stroke-width: 2; animation-delay: 2.2s; }
-@keyframes treeGrow {
-  from { stroke-dashoffset: 2600; }
-  to   { stroke-dashoffset: 0; }
-}
-.tree-node {
-  opacity: 1;
-  animation: treeRise 0.7s ease-out forwards;
-  cursor: pointer;
-}
-.tree-node .tn-ring {
-  fill: #0d0d0f; stroke-width: 2.5;
-  transition: filter 0.25s ease;
-}
+.tree-node { cursor: pointer; }
+.tree-node .tn-ring { transition: filter 0.25s ease; }
 .tree-node:hover .tn-ring { filter: drop-shadow(0 0 8px currentColor); }
-.tree-node .tn-dot { stroke-width: 1; }
-.tree-label {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
-  fill: var(--ink-muted);
-  pointer-events: none;
-}
-.tree-label.era-name { font-family: var(--serif-title); font-size: 15px; fill: var(--ink); letter-spacing: 0.08em; }
-.tree-label.era-code { font-size: 8.5px; letter-spacing: 0.26em; fill: var(--ink-muted); }
-.tree-label.line-name { font-size: 9px; letter-spacing: 0.3em; fill: var(--ink-muted); }
-@keyframes treeRise {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
+.tree-label { pointer-events: none; }
 .tree-hint {
   position: absolute; right: 14px; bottom: 12px;
   font-family: var(--mono); font-size: 10px; letter-spacing: 0.26em;
@@ -3553,62 +3515,101 @@ var AudioFX = (function () {
   var TECH_PTS = [[560, 1398], [572, 1196], [586, 1000], [608, 796], [652, 640], [695, 470], [742, 320]];
   var PRIM_PTS = [[468, 1432], [478, 1227], [528, 1012], [530, 817], [473, 612], [528, 407], [530, 202]];
 
-  // 枝干
-  svg.appendChild(el("path", { class: "tree-trunk", d: "M500,1450 C520,1150 480,800 500,220" }));
-  svg.appendChild(el("path", { class: "tree-branch chaos", d: "M500,835 C380,780 300,660 262,500 C240,400 215,290 195,190" }));
-  svg.appendChild(el("path", { class: "tree-branch tech", d: "M500,1040 C620,980 700,830 738,660 C762,560 785,400 800,220" }));
-  svg.appendChild(el("path", { class: "tree-branch crown", d: "M500,220 C470,140 430,90 400,30" }));
-  svg.appendChild(el("path", { class: "tree-branch crown", d: "M500,220 C500,150 500,90 500,20" }));
-  svg.appendChild(el("path", { class: "tree-branch crown", d: "M500,220 C530,140 570,90 600,30" }));
-  // 线名
-  svg.appendChild(el("text", { class: "tree-label line-name", x: 430, y: 1458, "text-anchor": "end" }, "帝国之线 EMPIRE"));
-  svg.appendChild(el("text", { class: "tree-label line-name", x: 255, y: 520, "text-anchor": "end", fill: "#c07070" }, "混沌之线 CHAOS"));
-  svg.appendChild(el("text", { class: "tree-label line-name", x: 745, y: 540, "text-anchor": "start", fill: "#a08a5a" }, "科技之线 TECH"));
-  svg.appendChild(el("text", { class: "tree-label line-name", x: 555, y: 148, "text-anchor": "middle", fill: "#8aa8c8" }, "原体之芽 PRIMARCH"));
-
-  // 时代节点（主干）
-  CHRONICLES.forEach(function (c, i) {
-    var g = el("g", { class: "tree-node", transform: "translate(" + NODES[i] + "," + ERAS_Y[i] + ")", "data-ci": i });
-    g.style.animationDelay = (0.4 + i * 0.38) + "s";
-    var ring = el("circle", { class: "tn-ring", r: 17, stroke: c.accent, fill: "#0d0d0f" });
-    ring.style.color = c.accent;
+  // 全部视觉样式内联（规避 Chrome 下 SVG+CSS 类+动画的渲染问题）
+  function mkPath(d, stroke, width, dash) {
+    var p = el("path", {
+      d: d, fill: "none", stroke: stroke, "stroke-width": width,
+      "stroke-linecap": "round"
+    });
+    var len = p.getTotalLength();
+    p.style.strokeDasharray = len;
+    p.style.strokeDashoffset = dash ? len : 0;
+    return p;
+  }
+  function mkDot(x, y, r, color, ci, line, extra) {
+    var g = el("g", { class: "tree-node", transform: "translate(" + x + "," + y + ")", "data-ci": ci, "data-line": line, opacity: "0" });
+    var d = el("circle", { class: "tn-dot", r: r, fill: color, stroke: "none" });
+    d.style.color = color;
+    g.appendChild(d);
+    if (extra) extra(g);
+    g.addEventListener("click", function () { openChrono(ci); AudioFX.click(); });
+    return g;
+  }
+  function mkRing(x, y, accent, ci) {
+    var g = el("g", { class: "tree-node", transform: "translate(" + x + "," + y + ")", "data-ci": ci, opacity: "0" });
+    var ring = el("circle", { class: "tn-ring", r: 17, fill: "#0d0d0f", stroke: accent, "stroke-width": 2.5 });
+    ring.style.color = accent;
     g.appendChild(ring);
-    g.appendChild(el("circle", { class: "tn-dot", r: 5, fill: c.accent }));
-    g.appendChild(el("text", { class: "tree-label era-name", x: 32, y: -2 }, c.era));
-    g.appendChild(el("text", { class: "tree-label era-code", x: 32, y: 15 }, c.name));
-    g.addEventListener("click", function () { openChrono(i); AudioFX.click(); });
-    svg.appendChild(g);
-  });
-  // 混沌左枝事件点
+    g.appendChild(el("circle", { r: 5, fill: accent, stroke: "none" }));
+    g.appendChild(el("text", { class: "tree-label", x: 32, y: -2, fill: "#e8e0cf", "font-family": "Georgia, serif", "font-size": 15, "letter-spacing": "0.08em" }, CHRONICLES[ci].era));
+    g.appendChild(el("text", { class: "tree-label", x: 32, y: 15, fill: "#8a8371", "font-family": "Consolas, monospace", "font-size": 8.5, "letter-spacing": "0.26em" }, CHRONICLES[ci].name));
+    g.addEventListener("click", function () { openChrono(ci); AudioFX.click(); });
+    return g;
+  }
+
+  var trunkP = mkPath("M500,1450 C520,1150 480,800 500,220", "#d4af37", 4, true);
+  var chaosP = mkPath("M500,835 C380,780 300,660 262,500 C240,400 215,290 195,190", "#b03030", 2.5, true);
+  var techP = mkPath("M500,1040 C620,980 700,830 738,660 C762,560 785,400 800,220", "#b08d3e", 2.5, true);
+  var crown1 = mkPath("M500,220 C470,140 430,90 400,30", "#d4af37", 2, true);
+  var crown2 = mkPath("M500,220 C500,150 500,90 500,20", "#d4af37", 2, true);
+  var crown3 = mkPath("M500,220 C530,140 570,90 600,30", "#d4af37", 2, true);
+  [trunkP, chaosP, techP, crown1, crown2, crown3].forEach(function (p) { svg.appendChild(p); });
+
+  // 线名（inline 样式）
+  svg.appendChild(el("text", { class: "tree-label", x: 430, y: 1458, "text-anchor": "end", fill: "#8a8371", "font-family": "Consolas, monospace", "font-size": 9, "letter-spacing": "0.3em" }, "帝国之线 EMPIRE"));
+  svg.appendChild(el("text", { class: "tree-label", x: 255, y: 520, "text-anchor": "end", fill: "#c07070", "font-family": "Consolas, monospace", "font-size": 9, "letter-spacing": "0.3em" }, "混沌之线 CHAOS"));
+  svg.appendChild(el("text", { class: "tree-label", x: 745, y: 540, "text-anchor": "start", fill: "#a08a5a", "font-family": "Consolas, monospace", "font-size": 9, "letter-spacing": "0.3em" }, "科技之线 TECH"));
+  svg.appendChild(el("text", { class: "tree-label", x: 555, y: 148, "text-anchor": "middle", fill: "#8aa8c8", "font-family": "Consolas, monospace", "font-size": 9, "letter-spacing": "0.3em" }, "原体之芽 PRIMARCH"));
+
+  // 节点（初始 opacity 0，由 JS 动画依次点亮）
+  var nodes = [];
+  CHRONICLES.forEach(function (c, i) { nodes.push(mkRing(NODES[i], ERAS_Y[i], c.accent, i)); });
   CHRONICLES.forEach(function (c, i) {
-    var g = el("g", { class: "tree-node", transform: "translate(" + CHAOS_PTS[i][0] + "," + CHAOS_PTS[i][1] + ")", "data-ci": i, "data-line": "chaos" });
-    g.style.animationDelay = (0.5 + i * 0.38) + "s";
-    var d = el("circle", { class: "tn-dot", r: i >= 3 ? 6.5 : 5, fill: "#b03030" });
-    d.style.color = "#b03030";
-    g.appendChild(d);
-    g.addEventListener("click", function () { openChrono(i); AudioFX.click(); });
-    svg.appendChild(g);
+    nodes.push(mkDot(CHAOS_PTS[i][0], CHAOS_PTS[i][1], i >= 3 ? 6.5 : 5, "#b03030", i, "chaos"));
+    nodes.push(mkDot(TECH_PTS[i][0], TECH_PTS[i][1], 5, "#b08d3e", i, "tech"));
+    nodes.push(mkDot(PRIM_PTS[i][0], PRIM_PTS[i][1], i === 3 ? 6 : 4.5, i === 3 ? "#7a1f1f" : "#4a7ab5", i, "primarch"));
   });
-  // 科技右枝事件点
-  CHRONICLES.forEach(function (c, i) {
-    var g = el("g", { class: "tree-node", transform: "translate(" + TECH_PTS[i][0] + "," + TECH_PTS[i][1] + ")", "data-ci": i, "data-line": "tech" });
-    g.style.animationDelay = (0.55 + i * 0.38) + "s";
-    var d = el("circle", { class: "tn-dot", r: 5, fill: "#b08d3e" });
-    d.style.color = "#b08d3e";
-    g.appendChild(d);
-    g.addEventListener("click", function () { openChrono(i); AudioFX.click(); });
-    svg.appendChild(g);
-  });
-  // 原体之芽（蓝点）
-  CHRONICLES.forEach(function (c, i) {
-    var g = el("g", { class: "tree-node", transform: "translate(" + PRIM_PTS[i][0] + "," + PRIM_PTS[i][1] + ")", "data-ci": i, "data-line": "primarch" });
-    g.style.animationDelay = (0.45 + i * 0.38) + "s";
-    var d = el("circle", { class: "tn-dot", r: i === 3 ? 6 : 4.5, fill: i === 3 ? "#7a1f1f" : "#4a7ab5" });
-    d.style.color = i === 3 ? "#7a1f1f" : "#4a7ab5";
-    g.appendChild(d);
-    g.addEventListener("click", function () { openChrono(i); AudioFX.click(); });
-    svg.appendChild(g);
-  });
+  nodes.forEach(function (n) { svg.appendChild(n); });
+
+  // JS 生长动画：主干→枝→节点（从根部向上）
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) {
+    nodes.forEach(function (n) { n.setAttribute("opacity", "1"); });
+  } else {
+    var paths = [trunkP, chaosP, techP, crown1, crown2, crown3];
+    function growPath(p, done) {
+      var len = parseFloat(p.style.strokeDasharray);
+      var timer = setInterval(function () {
+        var cur = parseFloat(p.style.strokeDashoffset);
+        var next = cur - 55;
+        if (next <= 0) { p.style.strokeDashoffset = 0; clearInterval(timer); done(); }
+        else p.style.strokeDashoffset = next;
+      }, 16);
+    }
+    growPath(trunkP, function () {
+      var remaining = [chaosP, techP, crown1, crown2, crown3];
+      var bi = 0;
+      (function nextBranch() {
+        if (bi >= remaining.length) { lightNodes(); return; }
+        growPath(remaining[bi], nextBranch);
+        bi++;
+      })();
+    });
+    function lightNodes() {
+      // 从底部（黄金时代）到顶部依次点亮：28 节点按 y 排序
+      var order = nodes.slice().sort(function (a, b) {
+        var ta = a.transform.baseVal.length ? a.transform.baseVal.getItem(0).matrix.f : 0;
+        var tb = b.transform.baseVal.length ? b.transform.baseVal.getItem(0).matrix.f : 0;
+        return tb - ta;
+      });
+      var i = 0;
+      var t2 = setInterval(function () {
+        if (i >= order.length) { clearInterval(t2); return; }
+        order[i].setAttribute("opacity", "1");
+        i++;
+      }, 110);
+    }
+  }
 
   // hover tooltip（事件委托）
   svg.addEventListener("mousemove", function (e) {
@@ -3685,31 +3686,6 @@ var AudioFX = (function () {
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && !overlay.hidden) closeChrono();
   });
-
-  // 渐入
-  var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (en) {
-      if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
-    });
-  }, { threshold: 0.1 });
-  var sec = document.getElementById("narrativa");
-  if (sec) {
-    sec.style.opacity = "0";
-    sec.style.transform = "translateY(20px)";
-    sec.style.transition = "opacity .7s ease, transform .7s ease";
-    io.observe(sec);
-  }
-  document.addEventListener("scroll", function () {
-    if (sec && !sec.classList.contains("in")) {
-      var r = sec.getBoundingClientRect();
-      if (r.top < window.innerHeight && r.bottom > 0) {
-        sec.classList.add("in");
-        sec.style.opacity = "1";
-        sec.style.transform = "none";
-        io.unobserve(sec);
-      }
-    }
-  }, { passive: true });
 })();
 
 /* ============================================================
