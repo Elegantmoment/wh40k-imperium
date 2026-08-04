@@ -3839,6 +3839,8 @@ var AudioFX = (function () {
   var PAGES = ["home", "legends", "starmap", "chronicle", "terminal"];
   function setPage(p) {
     if (PAGES.indexOf(p) === -1) p = "home";
+    // 重置入口之门（回到首页时门应关闭）
+    document.querySelectorAll(".entry-card.open").forEach(function (c) { c.classList.remove("open"); });
     var cls = document.body.className.replace(/\bpage-\w+/g, "").trim();
     document.body.className = cls + " page-" + p;
     document.querySelectorAll(".nav-link").forEach(function (a) {
