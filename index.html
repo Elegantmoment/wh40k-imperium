@@ -1340,46 +1340,134 @@ body.page-starmap .view-starmap,
 body.page-chronicle .view-chronicle,
 body.page-terminal .view-terminal { display: block; }
 
-/* 首页：入口卡片 */
+/* 首页：入口之门（哥特拱门 + 3D 开门动画） */
 .home-entry { padding: 60px 0 70px; }
 .entry-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 22px; margin-top: 44px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 26px; margin-top: 44px;
 }
 .entry-card {
-  border: 1px solid var(--line);
-  background: linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
-  padding: 28px 24px 22px;
-  position: relative;
+  display: block; position: relative;
+  height: 330px;
   text-decoration: none;
-  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  perspective: 900px;
+  outline: none;
+}
+.door-frame {
+  position: absolute; inset: 0;
+  border: 2px solid #8a6d2f;
+  border-radius: 46% 46% 10px 10px / 22% 22% 10px 10px;
   overflow: hidden;
+  background: radial-gradient(ellipse at 50% 58%, rgba(212, 175, 55, 0.5), rgba(36, 27, 9, 0.92) 70%);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.55), inset 0 0 46px rgba(0, 0, 0, 0.6);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
-.entry-card::before {
+.entry-card:hover .door-frame {
+  border-color: var(--accent, #d4af37);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.55), inset 0 0 46px rgba(0, 0, 0, 0.6), 0 0 30px rgba(176, 141, 62, 0.15);
+}
+.door-frame::before {
   content: "";
-  position: absolute; top: -1px; left: 14%; right: 14%; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  position: absolute; top: 10px; left: 14px; right: 14px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent, #d4af37), transparent);
+  z-index: 4;
 }
-.entry-card:hover {
-  border-color: var(--gold);
-  transform: translateY(-3px);
-  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5), 0 0 24px rgba(176, 141, 62, 0.12);
+.door-panel {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  transition: transform 0.85s cubic-bezier(0.45, 0, 0.2, 1);
+  will-change: transform;
+  z-index: 2;
 }
-.entry-card .ec-num {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.3em;
-  color: var(--gold); text-transform: uppercase;
+.door-panel.left {
+  left: 0;
+  border-radius: 92% 0 0 0 / 52% 0 0 0;
+  background:
+    radial-gradient(circle at 16% 26%, rgba(212, 175, 55, 0.14), transparent 34%),
+    linear-gradient(90deg, #171208 0%, #4a3714 14%, #2a200e 32%, #5c4620 50%, #33260f 72%, #4a3714 90%, #171208 100%);
+  border-right: 1px solid rgba(212, 175, 55, 0.4);
+  transform-origin: left center;
 }
-.entry-card h3 {
-  font-family: var(--serif-title); font-size: 20px; letter-spacing: 0.08em;
-  color: var(--ink); margin: 10px 0 8px;
+.door-panel.right {
+  right: 0;
+  border-radius: 0 92% 0 0 / 0 52% 0 0;
+  background:
+    radial-gradient(circle at 84% 26%, rgba(212, 175, 55, 0.14), transparent 34%),
+    linear-gradient(90deg, #4a3714 0%, #171208 10%, #5c4620 28%, #2a200e 50%, #4a3714 72%, #33260f 88%, #171208 100%);
+  border-left: 1px solid rgba(212, 175, 55, 0.4);
+  transform-origin: right center;
 }
-.entry-card p { font-size: 13.5px; color: var(--ink-muted); line-height: 1.6; }
-.entry-card .ec-go {
-  display: inline-block; margin-top: 14px;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.24em;
-  color: var(--gold-bright); text-transform: uppercase;
-  border-bottom: 1px solid rgba(176, 141, 62, 0.4);
+/* 铆钉 */
+.door-panel::before, .door-panel::after {
+  content: "";
+  position: absolute;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #e8cf9a, #8a6d2f 72%);
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.85);
+  z-index: 3;
+}
+.door-panel.left::before { left: 12px; top: 14%; }
+.door-panel.left::after { left: 12px; bottom: 14%; }
+.door-panel.right::before { right: 12px; top: 14%; }
+.door-panel.right::after { right: 12px; bottom: 14%; }
+/* 门环把手 */
+.door-handle {
+  position: absolute; top: 52%;
+  width: 15px; height: 15px;
+  border: 2.5px solid var(--accent, #d4af37);
+  border-radius: 50%;
+  box-shadow: 0 0 7px rgba(212, 175, 55, 0.45), inset 0 0 4px rgba(0, 0, 0, 0.5);
+  z-index: 3;
+}
+.door-panel.right .door-handle { left: 16px; }
+.door-panel.left .door-handle { right: 16px; }
+/* 门扇文字 */
+.door-text {
+  position: relative; z-index: 3;
+  height: 100%; box-sizing: border-box;
+  padding: 40px 20px 22px;
+  display: flex; flex-direction: column;
+}
+.door-panel.left .door-text { align-items: flex-start; }
+.door-panel.right .door-text { align-items: flex-start; }
+.door-ec-num {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.28em;
+  color: #c9a35a; text-transform: uppercase;
+  margin-top: 30px;
+}
+.door-title {
+  font-family: var(--serif-title); font-size: 25px; letter-spacing: 0.1em;
+  color: #f0dda8; margin: 12px 0 0;
+  text-shadow: 0 0 14px rgba(212, 175, 55, 0.45);
+}
+.door-desc {
+  font-size: 12.5px; color: #b5a888; line-height: 1.75;
+  margin: 10px 0 0;
+}
+.door-go {
+  margin-top: auto;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em;
+  color: var(--accent, #d4af37); text-transform: uppercase;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.5);
   padding-bottom: 2px;
+}
+/* 门内辉光 */
+.door-glow {
+  position: absolute; inset: 0; z-index: 1;
+  background: radial-gradient(ellipse at 50% 55%, rgba(240, 221, 168, 0.9), rgba(176, 141, 62, 0.4) 50%, transparent 78%);
+  opacity: 0;
+  transition: opacity 0.55s ease;
+}
+/* ===== 开门动画 ===== */
+.entry-card.open .door-panel.left {
+  transform: perspective(900px) rotateY(-106deg);
+}
+.entry-card.open .door-panel.right {
+  transform: perspective(900px) rotateY(106deg);
+}
+.entry-card.open .door-glow { opacity: 1; }
+.entry-card.open .door-frame {
+  border-color: var(--accent, #d4af37);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.55), 0 0 60px rgba(240, 221, 168, 0.35);
 }
 
 /* ============ 纪元叙事：上升之树（样式全部 inline，此处仅布局与 hover） ============ */
@@ -1503,29 +1591,81 @@ body.page-terminal .view-terminal { display: block; }
     <p class="section-sub">四重卷宗 · 从人物到银河 · 从历史到终端</p>
   </div>
   <div class="entry-grid">
-    <a class="entry-card" href="#/legends">
-      <div class="ec-num">Vol. I · PERSONAE</div>
-      <h3>英雄列传</h3>
-      <p>十二位要员档案——帝皇、原体与叛徒的完整生平、语录与装备。检索、筛选、翻阅。</p>
-      <span class="ec-go">开启卷宗 →</span>
+    <a class="entry-card" href="#/legends" style="--accent:#d4af37" aria-label="英雄列传">
+      <div class="door-frame">
+        <div class="door-panel left">
+          <div class="door-text">
+            <div class="door-ec-num">Vol. I · PERSONAE</div>
+            <div class="door-title">英雄列传</div>
+          </div>
+          <span class="door-handle"></span>
+        </div>
+        <div class="door-panel right">
+          <div class="door-text">
+            <p class="door-desc">十二位要员档案——帝皇、原体与叛徒的完整生平、语录与装备。检索、筛选、翻阅。</p>
+            <span class="door-go">开启卷宗 →</span>
+          </div>
+          <span class="door-handle"></span>
+        </div>
+        <div class="door-glow"></div>
+      </div>
     </a>
-    <a class="entry-card" href="#/starmap">
-      <div class="ec-num">Vol. II · CARTOGRAPHIA</div>
-      <h3>帝国星图</h3>
-      <p>可交互的银河系——2D 学术档案与 3D 粒子银河双视图，光点悬停见历史，点击开档案。</p>
-      <span class="ec-go">展开星图 →</span>
+    <a class="entry-card" href="#/starmap" style="--accent:#4a7ab5" aria-label="帝国星图">
+      <div class="door-frame">
+        <div class="door-panel left">
+          <div class="door-text">
+            <div class="door-ec-num">Vol. II · CARTOGRAPHIA</div>
+            <div class="door-title">帝国星图</div>
+          </div>
+          <span class="door-handle"></span>
+        </div>
+        <div class="door-panel right">
+          <div class="door-text">
+            <p class="door-desc">可交互的银河系——2D 学术档案与 3D 粒子银河双视图，光点悬停见历史，点击开档案。</p>
+            <span class="door-go">展开星图 →</span>
+          </div>
+          <span class="door-handle"></span>
+        </div>
+        <div class="door-glow"></div>
+      </div>
     </a>
-    <a class="entry-card" href="#/chronicle">
-      <div class="ec-num">Vol. III · CHRONOLOGIA</div>
-      <h3>纪元叙事</h3>
-      <p>从黄金时代到第 42 千年的上升之树——帝国、原体、混沌、科技四线并行的万年编年。</p>
-      <span class="ec-go">攀援圣树 →</span>
+    <a class="entry-card" href="#/chronicle" style="--accent:#b03030" aria-label="纪元叙事">
+      <div class="door-frame">
+        <div class="door-panel left">
+          <div class="door-text">
+            <div class="door-ec-num">Vol. III · CHRONOLOGIA</div>
+            <div class="door-title">纪元叙事</div>
+          </div>
+          <span class="door-handle"></span>
+        </div>
+        <div class="door-panel right">
+          <div class="door-text">
+            <p class="door-desc">从黄金时代到第 42 千年的上升之树——帝国、原体、混沌、科技四线并行的万年编年。</p>
+            <span class="door-go">攀援圣树 →</span>
+          </div>
+          <span class="door-handle"></span>
+        </div>
+        <div class="door-glow"></div>
+      </div>
     </a>
-    <a class="entry-card" href="#/terminal">
-      <div class="ec-num">Vol. IV · MUNITORUM</div>
-      <h3>军务部终端</h3>
-      <p>实时遥测数据流、波形可视化与命令行交互——帝国情报终端，接口契约预留真后端接入。</p>
-      <span class="ec-go">接入终端 →</span>
+    <a class="entry-card" href="#/terminal" style="--accent:#c9a35a" aria-label="军务部终端">
+      <div class="door-frame">
+        <div class="door-panel left">
+          <div class="door-text">
+            <div class="door-ec-num">Vol. IV · MUNITORUM</div>
+            <div class="door-title">军务部终端</div>
+          </div>
+          <span class="door-handle"></span>
+        </div>
+        <div class="door-panel right">
+          <div class="door-text">
+            <p class="door-desc">实时遥测数据流、波形可视化与命令行交互——帝国情报终端，接口契约预留真后端接入。</p>
+            <span class="door-go">接入终端 →</span>
+          </div>
+          <span class="door-handle"></span>
+        </div>
+        <div class="door-glow"></div>
+      </div>
     </a>
   </div>
 </section>
@@ -3685,6 +3825,17 @@ var AudioFX = (function () {
  * ============================================================ */
 (function () {
   "use strict";
+  // 入口之门：点击 3D 开门 → 金光 → 延迟跳转
+  document.querySelectorAll(".entry-card").forEach(function (card) {
+    card.addEventListener("click", function (e) {
+      e.preventDefault();
+      var href = card.getAttribute("href");
+      if (card.classList.contains("open")) { location.hash = href; return; }
+      card.classList.add("open");
+      AudioFX.seal();
+      setTimeout(function () { location.hash = href; }, 850);
+    });
+  });
   var PAGES = ["home", "legends", "starmap", "chronicle", "terminal"];
   function setPage(p) {
     if (PAGES.indexOf(p) === -1) p = "home";
