@@ -1427,18 +1427,18 @@ body.page-terminal .view-terminal { display: block; }
   padding: 40px 20px 22px;
   display: flex; flex-direction: column;
 }
-/* 真实门材质贴图层（Deal Castle 铆钉门，横向裁切避开石墙） */
+/* 真实门材质贴图层（天堂之门金色青铜门，裁切避开顶部环境） */
 .door-tex {
   position: absolute; inset: 0; z-index: 1;
   background-image: url("assets/door.jpg");
-  background-size: 300% 100%;
+  background-size: 300% 122%;
   background-repeat: no-repeat;
-  filter: brightness(0.72) sepia(0.42) saturate(0.85) contrast(1.08);
+  filter: brightness(0.92) sepia(0.12) saturate(1.15) contrast(1.05);
   opacity: 0.95;
   pointer-events: none;
 }
-.door-panel.left .door-tex { background-position: 3% center; }
-.door-panel.right .door-tex { background-position: 35% center; }
+.door-panel.left .door-tex { background-position: 3% 24%; }
+.door-panel.right .door-tex { background-position: 35% 24%; }
 .door-panel.left .door-text { align-items: flex-start; }
 .door-panel.right .door-text { align-items: flex-start; }
 .door-ec-num {
