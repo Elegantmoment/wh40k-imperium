@@ -1427,18 +1427,18 @@ body.page-terminal .view-terminal { display: block; }
   padding: 40px 20px 22px;
   display: flex; flex-direction: column;
 }
-/* 真实门材质贴图层（天堂之门金色青铜门，裁切避开顶部环境） */
+/* 真实门材质贴图层（AI 生成哥特金门：黑底金字，左右扇对半拼合） */
 .door-tex {
   position: absolute; inset: 0; z-index: 1;
   background-image: url("assets/door.jpg");
-  background-size: 300% 122%;
+  background-size: 200% 100%;
   background-repeat: no-repeat;
-  filter: brightness(0.92) sepia(0.12) saturate(1.15) contrast(1.05);
-  opacity: 0.95;
+  filter: brightness(0.95) saturate(1.12) contrast(1.04);
+  opacity: 1;
   pointer-events: none;
 }
-.door-panel.left .door-tex { background-position: 3% 24%; }
-.door-panel.right .door-tex { background-position: 35% 24%; }
+.door-panel.left .door-tex { background-position: left center; }
+.door-panel.right .door-tex { background-position: right center; }
 .door-panel.left .door-text { align-items: flex-start; }
 .door-panel.right .door-text { align-items: flex-start; }
 .door-ec-num {
