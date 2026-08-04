@@ -1427,6 +1427,18 @@ body.page-terminal .view-terminal { display: block; }
   padding: 40px 20px 22px;
   display: flex; flex-direction: column;
 }
+/* 真实门材质贴图层（Deal Castle 铆钉门，横向裁切避开石墙） */
+.door-tex {
+  position: absolute; inset: 0; z-index: 1;
+  background-image: url("assets/door.jpg");
+  background-size: 300% 100%;
+  background-repeat: no-repeat;
+  filter: brightness(0.72) sepia(0.42) saturate(0.85) contrast(1.08);
+  opacity: 0.95;
+  pointer-events: none;
+}
+.door-panel.left .door-tex { background-position: 3% center; }
+.door-panel.right .door-tex { background-position: 35% center; }
 .door-panel.left .door-text { align-items: flex-start; }
 .door-panel.right .door-text { align-items: flex-start; }
 .door-ec-num {
@@ -1594,6 +1606,7 @@ body.page-terminal .view-terminal { display: block; }
     <a class="entry-card" href="#/legends" style="--accent:#d4af37" aria-label="英雄列传">
       <div class="door-frame">
         <div class="door-panel left">
+          <div class="door-tex"></div>
           <div class="door-text">
             <div class="door-ec-num">Vol. I · PERSONAE</div>
             <div class="door-title">英雄列传</div>
@@ -1601,6 +1614,7 @@ body.page-terminal .view-terminal { display: block; }
           <span class="door-handle"></span>
         </div>
         <div class="door-panel right">
+          <div class="door-tex"></div>
           <div class="door-text">
             <p class="door-desc">十二位要员档案——帝皇、原体与叛徒的完整生平、语录与装备。检索、筛选、翻阅。</p>
             <span class="door-go">开启卷宗 →</span>
@@ -1613,6 +1627,7 @@ body.page-terminal .view-terminal { display: block; }
     <a class="entry-card" href="#/starmap" style="--accent:#4a7ab5" aria-label="帝国星图">
       <div class="door-frame">
         <div class="door-panel left">
+          <div class="door-tex"></div>
           <div class="door-text">
             <div class="door-ec-num">Vol. II · CARTOGRAPHIA</div>
             <div class="door-title">帝国星图</div>
@@ -1620,6 +1635,7 @@ body.page-terminal .view-terminal { display: block; }
           <span class="door-handle"></span>
         </div>
         <div class="door-panel right">
+          <div class="door-tex"></div>
           <div class="door-text">
             <p class="door-desc">可交互的银河系——2D 学术档案与 3D 粒子银河双视图，光点悬停见历史，点击开档案。</p>
             <span class="door-go">展开星图 →</span>
@@ -1632,6 +1648,7 @@ body.page-terminal .view-terminal { display: block; }
     <a class="entry-card" href="#/chronicle" style="--accent:#b03030" aria-label="纪元叙事">
       <div class="door-frame">
         <div class="door-panel left">
+          <div class="door-tex"></div>
           <div class="door-text">
             <div class="door-ec-num">Vol. III · CHRONOLOGIA</div>
             <div class="door-title">纪元叙事</div>
@@ -1639,6 +1656,7 @@ body.page-terminal .view-terminal { display: block; }
           <span class="door-handle"></span>
         </div>
         <div class="door-panel right">
+          <div class="door-tex"></div>
           <div class="door-text">
             <p class="door-desc">从黄金时代到第 42 千年的上升之树——帝国、原体、混沌、科技四线并行的万年编年。</p>
             <span class="door-go">攀援圣树 →</span>
@@ -1651,6 +1669,7 @@ body.page-terminal .view-terminal { display: block; }
     <a class="entry-card" href="#/terminal" style="--accent:#c9a35a" aria-label="军务部终端">
       <div class="door-frame">
         <div class="door-panel left">
+          <div class="door-tex"></div>
           <div class="door-text">
             <div class="door-ec-num">Vol. IV · MUNITORUM</div>
             <div class="door-title">军务部终端</div>
@@ -1658,6 +1677,7 @@ body.page-terminal .view-terminal { display: block; }
           <span class="door-handle"></span>
         </div>
         <div class="door-panel right">
+          <div class="door-tex"></div>
           <div class="door-text">
             <p class="door-desc">实时遥测数据流、波形可视化与命令行交互——帝国情报终端，接口契约预留真后端接入。</p>
             <span class="door-go">接入终端 →</span>
