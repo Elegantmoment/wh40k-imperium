@@ -3546,14 +3546,206 @@ var AudioFX = (function () {
     g.addEventListener("click", function () { openChrono(ci); AudioFX.click(); });
     return g;
   }
+  // 叶簇：围绕枝端的一圈小叶片
+  function leafCluster(x, y, color, n, size, opBase) {
+    var g = el("g", { transform: "translate(" + x + "," + y + ")", opacity: "0", style: "pointer-events:none" });
+    for (var i = 0; i < n; i++) {
+      var a = (i / n) * Math.PI * 2 + Math.random() * 0.7;
+      var rr = size * (0.5 + Math.random() * 0.5);
+      var lx = Math.cos(a) * rr * 0.45;
+      var ly = Math.sin(a) * rr * 0.45;
+      var leaf = el("ellipse", {
+        cx: lx, cy: ly,
+        rx: size * (0.3 + Math.random() * 0.22),
+        ry: size * (0.14 + Math.random() * 0.1),
+        fill: color,
+        opacity: (opBase + Math.random() * 0.3).toFixed(2)
+      });
+      leaf.setAttribute("transform", "rotate(" + Math.round(Math.random() * 360) + " " + lx + " " + ly + ")");
+      g.appendChild(leaf);
+    }
+    return g;
+  }
+  // 沿枝散布叶片（getPointAtLength 采样，让侧枝沿途茂密）
+  function scatterLeaves(path, color, n, size, opBase, diamond) {
+    var g = el("g", { opacity: "0", style: "pointer-events:none" });
+    var len = path.getTotalLength();
+    for (var i = 1; i <= n; i++) {
+      var pt = path.getPointAtLength(len * (i / (n + 1)));
+      var k = 3 + Math.floor(Math.random() * 3);
+      for (var j = 0; j < k; j++) {
+        var a = Math.random() * Math.PI * 2;
+        var rr = size * (0.4 + Math.random() * 0.45);
+        var lx = pt.x + Math.cos(a) * rr * 0.5;
+        var ly = pt.y + Math.sin(a) * rr * 0.5;
+        if (diamond) {
+          var dl = el("polygon", {
+            points: "0,-" + size * 0.3 + " " + size * 0.22 + ",0 0," + size * 0.3 + " -" + size * 0.22 + ",0",
+            fill: color,
+            opacity: (opBase + Math.random() * 0.3).toFixed(2)
+          });
+          dl.setAttribute("transform", "translate(" + lx + "," + ly + ") rotate(" + Math.round(Math.random() * 360) + ")");
+          g.appendChild(dl);
+        } else {
+          var leaf = el("ellipse", {
+            cx: lx, cy: ly,
+            rx: size * (0.26 + Math.random() * 0.16),
+            ry: size * (0.12 + Math.random() * 0.08),
+            fill: color,
+            opacity: (opBase + Math.random() * 0.3).toFixed(2)
+          });
+          leaf.setAttribute("transform", "rotate(" + Math.round(Math.random() * 360) + " " + lx + " " + ly + ")");
+          g.appendChild(leaf);
+        }
+      }
+    }
+    return g;
+  }
 
-  var trunkP = mkPath("M500,1450 C520,1150 480,800 500,220", "#d4af37", 4, true);
-  var chaosP = mkPath("M500,835 C380,780 300,660 262,500 C240,400 215,290 195,190", "#b03030", 2.5, true);
-  var techP = mkPath("M500,1040 C620,980 700,830 738,660 C762,560 785,400 800,220", "#b08d3e", 2.5, true);
-  var crown1 = mkPath("M500,220 C470,140 430,90 400,30", "#d4af37", 2, true);
-  var crown2 = mkPath("M500,220 C500,150 500,90 500,20", "#d4af37", 2, true);
-  var crown3 = mkPath("M500,220 C530,140 570,90 600,30", "#d4af37", 2, true);
-  [trunkP, chaosP, techP, crown1, crown2, crown3].forEach(function (p) { svg.appendChild(p); });
+  // ===== defs：树干渐变 / 树冠渐变 =====
+  var defs = el("defs");
+  var trunkGrad = el("linearGradient", { id: "trunkGrad", x1: 0, y1: 0, x2: 1, y2: 0 });
+  trunkGrad.appendChild(el("stop", { offset: "0%", "stop-color": "#4a3714" }));
+  trunkGrad.appendChild(el("stop", { offset: "42%", "stop-color": "#d4af37" }));
+  trunkGrad.appendChild(el("stop", { offset: "58%", "stop-color": "#e8cf9a" }));
+  trunkGrad.appendChild(el("stop", { offset: "100%", "stop-color": "#4a3714" }));
+  defs.appendChild(trunkGrad);
+  var crownGrad = el("radialGradient", { id: "crownGrad" });
+  crownGrad.appendChild(el("stop", { offset: "0%", "stop-color": "#f0dda8", "stop-opacity": 0.85 }));
+  crownGrad.appendChild(el("stop", { offset: "100%", "stop-color": "#b08d3e", "stop-opacity": 0.08 }));
+  defs.appendChild(crownGrad);
+  svg.appendChild(defs);
+
+  // ===== 根部（根须） =====
+  var roots = [];
+  var rootDefs = [
+    "M492,1450 C488,1485 470,1505 448,1522",
+    "M500,1452 C502,1490 508,1508 522,1524",
+    "M508,1450 C512,1482 530,1500 552,1514",
+    "M496,1451 C494,1488 482,1504 462,1518"
+  ];
+  rootDefs.forEach(function (d) {
+    var r = mkPath(d, "#8a6d2f", 3, false);
+    r.setAttribute("opacity", "0");
+    roots.push(r);
+  });
+
+  // ===== 树干轮廓（封闭形状 + 渐变填充 + 树皮纹理） =====
+  var trunkShape = el("path", {
+    d: "M476,1454 C492,1160 470,820 481,228 C493,206 507,206 519,228 C530,820 508,1160 524,1454 C510,1464 490,1464 476,1454 Z",
+    fill: "url(#trunkGrad)", stroke: "#3a2c12", "stroke-width": 1.2,
+    opacity: "0"
+  });
+  var barkLines = [
+    mkPath("M490,1405 C506,1150 484,900 496,620 C501,460 496,310 500,240", "#c9a35a", 2.6, false),
+    mkPath("M507,1420 C491,1160 514,880 502,640 C498,470 504,320 502,240", "#6b5226", 2.2, false),
+    mkPath("M497,1380 C498,1180 496,960 498,760", "#a08040", 1.8, false)
+  ];
+  barkLines.forEach(function (b) { b.setAttribute("opacity", "0"); });
+  // 节疤
+  var knots = [
+    el("ellipse", { cx: 495, cy: 1150, rx: 7, ry: 12, fill: "#3a2c12", opacity: "0", style: "pointer-events:none" }),
+    el("ellipse", { cx: 507, cy: 850, rx: 6, ry: 10, fill: "#3a2c12", opacity: "0", style: "pointer-events:none" }),
+    el("ellipse", { cx: 497, cy: 520, rx: 5, ry: 9, fill: "#3a2c12", opacity: "0", style: "pointer-events:none" })
+  ];
+
+  // ===== 主枝（宽描边）+ 分叉细枝 =====
+  var chaosP = mkPath("M500,835 C380,780 300,660 262,500 C240,400 215,290 195,190", "#8a1f1f", 4, true);
+  var techP = mkPath("M500,1040 C620,980 700,830 738,660 C762,560 785,400 800,220", "#7a5c20", 4, true);
+  var chaosBranch1 = mkPath("M410,772 C340,756 290,750 246,766", "#8a1f1f", 2.2, true);
+  var chaosBranch2 = mkPath("M330,640 C278,600 246,558 216,536", "#8a1f1f", 1.8, true);
+  var chaosBranch3 = mkPath("M272,496 C236,470 206,430 182,396", "#8a1f1f", 1.6, true);
+  var techBranch1 = el("path", { d: "M590,978 C650,960 706,946 748,926", fill: "none", stroke: "#7a5c20", "stroke-width": 2.2, "stroke-linecap": "round" });
+  var techBranch2 = el("path", { d: "M668,826 C712,782 744,730 768,690", fill: "none", stroke: "#7a5c20", "stroke-width": 1.8, "stroke-linecap": "round" });
+  var techBranch3 = el("path", { d: "M726,658 C756,616 776,560 790,520", fill: "none", stroke: "#7a5c20", "stroke-width": 1.6, "stroke-linecap": "round" });
+  [chaosBranch1, chaosBranch2, chaosBranch3, techBranch1, techBranch2, techBranch3].forEach(function (b) {
+    var len = b.getTotalLength();
+    b.style.strokeDasharray = len;
+    b.style.strokeDashoffset = len;
+  });
+  // 树冠枝（保留，加粗）
+  var crown1 = mkPath("M500,228 C472,150 436,96 404,34", "#b08d3e", 2.4, true);
+  var crown2 = mkPath("M500,228 C500,158 500,100 500,26", "#b08d3e", 2.4, true);
+  var crown3 = mkPath("M500,228 C528,150 564,96 596,34", "#b08d3e", 2.4, true);
+
+  // ===== 树冠叶片云（茂密金叶：加大加密提亮） =====
+  var crownCloud = el("g", { opacity: "0", style: "pointer-events:none" });
+  for (var ci2 = 0; ci2 < 24; ci2++) {
+    var a2 = Math.random() * Math.PI * 2;
+    var rr2 = Math.sqrt(Math.random()) * 0.92;
+    var lx2 = 500 + Math.cos(a2) * 175 * rr2;
+    var ly2 = 150 + Math.sin(a2) * 105 * rr2;
+    var s2 = 50 + Math.random() * 48;
+    var leaf2 = el("ellipse", { cx: lx2, cy: ly2, rx: s2, ry: s2 * 0.42, fill: "url(#crownGrad)" });
+    leaf2.setAttribute("transform", "rotate(" + Math.round(Math.random() * 360) + " " + lx2 + " " + ly2 + ")");
+    crownCloud.appendChild(leaf2);
+  }
+  for (var ci3 = 0; ci3 < 20; ci3++) {
+    var a3 = Math.random() * Math.PI * 2;
+    var rr3 = Math.random() * 0.95;
+    var lx3 = 500 + Math.cos(a3) * 160 * rr3;
+    var ly3 = 150 + Math.sin(a3) * 95 * rr3;
+    var s3 = 28 + Math.random() * 30;
+    var leaf3 = el("ellipse", { cx: lx3, cy: ly3, rx: s3, ry: s3 * 0.4, fill: "#d4af37", opacity: (0.4 + Math.random() * 0.35).toFixed(2) });
+    leaf3.setAttribute("transform", "rotate(" + Math.round(Math.random() * 360) + " " + lx3 + " " + ly3 + ")");
+    crownCloud.appendChild(leaf3);
+  }
+  for (var ci4 = 0; ci4 < 14; ci4++) {
+    var a4 = Math.random() * Math.PI * 2;
+    var rr4 = Math.random() * 0.9;
+    var lx4 = 500 + Math.cos(a4) * 150 * rr4;
+    var ly4 = 150 + Math.sin(a4) * 90 * rr4;
+    var s4 = 18 + Math.random() * 16;
+    var leaf4 = el("ellipse", { cx: lx4, cy: ly4, rx: s4, ry: s4 * 0.38, fill: "#e8cf9a", opacity: (0.5 + Math.random() * 0.35).toFixed(2) });
+    leaf4.setAttribute("transform", "rotate(" + Math.round(Math.random() * 360) + " " + lx4 + " " + ly4 + ")");
+    crownCloud.appendChild(leaf4);
+  }
+
+  // ===== 叶簇（混沌血红 / 科技铜色 / 根部暗金） =====
+  var chaosLeaves = [
+    leafCluster(195, 190, "#c04040", 9, 26, 0.5),
+    leafCluster(216, 536, "#b03030", 6, 18, 0.45),
+    leafCluster(246, 766, "#b03030", 6, 17, 0.45),
+    leafCluster(300, 660, "#a02828", 5, 15, 0.4)
+  ];
+  var techLeaves = [
+    leafCluster(800, 220, "#c9a35a", 9, 26, 0.5),
+    leafCluster(768, 690, "#b08d3e", 6, 18, 0.45),
+    leafCluster(748, 926, "#b08d3e", 6, 17, 0.45),
+    leafCluster(700, 830, "#a08040", 5, 15, 0.4)
+  ];
+  var rootLeaves = [
+    leafCluster(448, 1522, "#8a6d2f", 4, 12, 0.2),
+    leafCluster(552, 1514, "#8a6d2f", 4, 12, 0.2)
+  ];
+  // 沿枝散布叶（侧枝茂密化：混沌荆棘叶 + 科技菱形机械叶）
+  var chaosScatter = scatterLeaves(chaosP, "#c04040", 12, 24, 0.5);
+  var chaosScatter2 = scatterLeaves(chaosBranch1, "#b03030", 5, 16, 0.45);
+  var techScatter = scatterLeaves(techP, "#c9a35a", 12, 24, 0.5, true);
+  var techScatter2 = scatterLeaves(techBranch1, "#b08d3e", 5, 16, 0.45, true);
+  // 三级细枝（更密的末梢）
+  var chaosTwig1 = el("path", { d: "M340,700 C310,690 288,678 268,662", fill: "none", stroke: "#8a1f1f", "stroke-width": 1.3, "stroke-linecap": "round" });
+  var chaosTwig2 = el("path", { d: "M285,555 C262,540 244,520 232,498", fill: "none", stroke: "#8a1f1f", "stroke-width": 1.2, "stroke-linecap": "round" });
+  var techTwig1 = el("path", { d: "M660,900 C690,886 714,868 734,846", fill: "none", stroke: "#7a5c20", "stroke-width": 1.3, "stroke-linecap": "round" });
+  var techTwig2 = el("path", { d: "M716,715 C740,698 758,676 770,652", fill: "none", stroke: "#7a5c20", "stroke-width": 1.2, "stroke-linecap": "round" });
+  [chaosTwig1, chaosTwig2, techTwig1, techTwig2].forEach(function (b) {
+    var len = b.getTotalLength();
+    b.style.strokeDasharray = len;
+    b.style.strokeDashoffset = len;
+  });
+
+  // ===== 组装 =====
+  roots.forEach(function (r) { svg.appendChild(r); });
+  svg.appendChild(trunkShape);
+  barkLines.forEach(function (b) { svg.appendChild(b); });
+  knots.forEach(function (k) { svg.appendChild(k); });
+  [chaosP, techP, chaosBranch1, chaosBranch2, chaosBranch3, techBranch1, techBranch2, techBranch3, crown1, crown2, crown3].forEach(function (p) { svg.appendChild(p); });
+  [chaosTwig1, chaosTwig2, techTwig1, techTwig2].forEach(function (p) { svg.appendChild(p); });
+  svg.appendChild(crownCloud);
+  chaosLeaves.forEach(function (l) { svg.appendChild(l); });
+  techLeaves.forEach(function (l) { svg.appendChild(l); });
+  rootLeaves.forEach(function (l) { svg.appendChild(l); });
+  [chaosScatter, chaosScatter2, techScatter, techScatter2].forEach(function (l) { svg.appendChild(l); });
 
   // 线名（inline 样式）
   svg.appendChild(el("text", { class: "tree-label", x: 430, y: 1458, "text-anchor": "end", fill: "#8a8371", "font-family": "Consolas, monospace", "font-size": 9, "letter-spacing": "0.3em" }, "帝国之线 EMPIRE"));
@@ -3571,12 +3763,22 @@ var AudioFX = (function () {
   });
   nodes.forEach(function (n) { svg.appendChild(n); });
 
-  // JS 生长动画：主干→枝→节点（从根部向上）
+  // ===== JS 生长动画：根→干→枝→叶→冠→节点 =====
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduce) {
     nodes.forEach(function (n) { n.setAttribute("opacity", "1"); });
+    [trunkShape, crownCloud].forEach(function (e) { e.setAttribute("opacity", "1"); });
+    roots.concat(barkLines, knots, chaosLeaves, techLeaves, rootLeaves).forEach(function (e) { e.setAttribute("opacity", "1"); });
   } else {
-    var paths = [trunkP, chaosP, techP, crown1, crown2, crown3];
+    // 阶段1：根须 + 树干轮廓（淡入）
+    setTimeout(function () {
+      roots.concat([trunkShape]).forEach(function (e) { e.setAttribute("opacity", "1"); });
+    }, 150);
+    // 阶段2：树皮纹 + 节疤
+    setTimeout(function () {
+      barkLines.concat(knots).forEach(function (e) { e.setAttribute("opacity", "1"); });
+    }, 650);
+    // 阶段3：主干生长（dashoffset）
     function growPath(p, done) {
       var len = parseFloat(p.style.strokeDasharray);
       var timer = setInterval(function () {
@@ -3586,15 +3788,26 @@ var AudioFX = (function () {
         else p.style.strokeDashoffset = next;
       }, 16);
     }
-    growPath(trunkP, function () {
-      var remaining = [chaosP, techP, crown1, crown2, crown3];
-      var bi = 0;
+    growPath(chaosP, function () {
+      var q = [techP, chaosBranch1, techBranch1, chaosBranch2, techBranch2, chaosBranch3, techBranch3, chaosTwig1, techTwig1, chaosTwig2, techTwig2, crown1, crown2, crown3];
+      var qi = 0;
       (function nextBranch() {
-        if (bi >= remaining.length) { lightNodes(); return; }
-        growPath(remaining[bi], nextBranch);
-        bi++;
+        if (qi >= q.length) { phaseLeaves(); return; }
+        growPath(q[qi], nextBranch);
+        qi++;
       })();
     });
+    // 阶段4：叶簇 + 树冠（淡入）
+    function phaseLeaves() {
+      setTimeout(function () {
+        chaosLeaves.concat(techLeaves, rootLeaves).forEach(function (l) { l.setAttribute("opacity", "1"); });
+      }, 200);
+      setTimeout(function () {
+        [chaosScatter, chaosScatter2, techScatter, techScatter2].forEach(function (l) { l.setAttribute("opacity", "1"); });
+      }, 420);
+      setTimeout(function () { crownCloud.setAttribute("opacity", "1"); }, 650);
+      lightNodes();
+    }
     function lightNodes() {
       // 从底部（黄金时代）到顶部依次点亮：28 节点按 y 排序
       var order = nodes.slice().sort(function (a, b) {
